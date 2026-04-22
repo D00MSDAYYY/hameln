@@ -1,6 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
 import { Panel, Typography, Flex } from '@maxhub/max-ui';
-import { clsx } from 'clsx';
 import styles from './EventCard.module.scss';
 
 export interface EventInfo {
@@ -25,7 +24,11 @@ export const EventCard = ({
 }: EventCardProps) => {
   const { name, tags, is_registered, points } = eventInfo;
 
+  // Увеличили порог срабатывания свайпа (было 60, стало 120)
   const SWIPE_THRESHOLD = 60;
+  // Максимальное смещение в пикселях (можно оставить 120 или увеличить)
+  const MAX_OFFSET = 70;
+
   const [offsetX, setOffsetX] = useState(0);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -42,8 +45,13 @@ export const EventCard = ({
   const handleMove = useCallback((clientX: number) => {
     if (!isDraggingRef.current) return;
     const diff = clientX - startXRef.current;
-    let newOffset = currentOffsetRef.current + diff;
-    newOffset = Math.min(0, Math.max(newOffset, -120));
+    
+    // Добавляем сопротивление: умножаем diff на коэффициент < 1, чтобы движение было медленнее
+    const RESISTANCE = 0.7; // чем меньше число, тем "тяжелее" двигать
+    let newOffset = currentOffsetRef.current + diff * RESISTANCE;
+    
+    // Ограничиваем смещение симметрично от -MAX_OFFSET до MAX_OFFSET
+    newOffset = Math.min(MAX_OFFSET, Math.max(newOffset, -MAX_OFFSET));
     setOffsetX(newOffset);
   }, []);
 
@@ -52,7 +60,7 @@ export const EventCard = ({
     isDraggingRef.current = false;
 
     const swipedLeft = offsetX < -SWIPE_THRESHOLD;
-    const swipedRight = offsetX > SWIPE_THRESHOLD && offsetX > 0;
+    const swipedRight = offsetX > SWIPE_THRESHOLD;
 
     if (swipedLeft && !is_registered) {
       onRegisterSwapped();
@@ -90,10 +98,6 @@ export const EventCard = ({
     transition: isDraggingRef.current ? 'none' : 'transform 0.3s ease-out',
   };
 
-  const bottomPanelClass = clsx(
-    styles.bottomPanel
-  );
-
   return (
     <div
       ref={containerRef}
@@ -101,11 +105,7 @@ export const EventCard = ({
       {...touchHandlers}
       {...mouseHandlers}
     >
-      <div className={bottomPanelClass}>
-        <div className={styles.registrationLabel}>
-          {is_registered ? 'Зарегистрирован' : ''}
-        </div>
-      </div>
+      <div className={styles.bottomPanel}></div>
 
       <div
         className={styles.topPanel}
