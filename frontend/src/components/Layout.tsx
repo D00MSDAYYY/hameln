@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { IconButton, Typography } from '@maxhub/max-ui';
 import HomePage from '../pages/HomePage';
 import ProfilePage from '../pages/ProfilePage';
+import NotificationsPage from '../pages/NotificationsPage';
+
+
 
 const AccountIcon = () => <span style={{ fontSize: 24 }}>👤</span>;
 const NotificationsIcon = () => <span style={{ fontSize: 24 }}>🔔</span>;
@@ -13,7 +16,7 @@ const Layout = () => {
   const handleHomeClick = () => setCurrentPage('home');
   const handleProfileClick = () => setCurrentPage('profile');
   const handleNotificationsClick = () => {
-    console.log('Открыть уведомления');
+    setCurrentPage('notifications');
   };
 
   const activeButtonStyle = {
@@ -56,22 +59,24 @@ const Layout = () => {
           <div style={{ padding: 16 }}>
             {currentPage === 'home' && <HomePage />}
             {currentPage === 'profile' && <ProfilePage />}
-            {currentPage === 'notifications' && <div>Уведомления (заглушка)</div>}
+            {currentPage === 'notifications' && <NotificationsPage />}
           </div>
         </div>
 
         <footer style={{
           display: 'flex',
-          borderTop: '1px solid var(--separator_common)',
-          background: 'var(--background_content)',
+          background: 'transparent',
           flexShrink: 0,
+          height: '55px',              // фиксированная высота футера
+          alignItems: 'stretch',       // чтобы кнопки растягивались на всю высоту
+          boxShadow: '0 -2px 8px rgba(0, 0, 0, 0.15)'
         }}>
           <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
             <IconButton
               onClick={handleProfileClick}
               style={{
                 width: '100%',
-                borderRadius: 0,
+                height: '100%',         // кнопка занимает всю высоту футера
                 ...(currentPage === 'profile' ? activeButtonStyle : {})
               }}
             >
@@ -83,7 +88,7 @@ const Layout = () => {
               onClick={handleHomeClick}
               style={{
                 width: '100%',
-                borderRadius: 0,
+                height: '100%',
                 ...(currentPage === 'home' ? activeButtonStyle : {})
               }}
             >
@@ -95,7 +100,7 @@ const Layout = () => {
               onClick={handleNotificationsClick}
               style={{
                 width: '100%',
-                borderRadius: 0,
+                height: '100%',
                 ...(currentPage === 'notifications' ? activeButtonStyle : {})
               }}
             >

@@ -26,10 +26,14 @@ export const EventInfoDisplayer = ({ eventName, onBack }: EventInfoDisplayerProp
         <Typography.Title variant="large-strong" style={{ marginBottom: 16 }}>
           {eventName}
         </Typography.Title>
-        <Typography.Body style={{ flex: 1 }}>
+        <Typography.Body>
           Здесь будет подробная информация о событии.
         </Typography.Body>
-        <Button mode="primary" onClick={onBack}>
+        <Button 
+          mode="primary" 
+          onClick={onBack}
+          style={{ marginTop: 'auto' }}
+        >
           Назад к списку
         </Button>
       </Panel>

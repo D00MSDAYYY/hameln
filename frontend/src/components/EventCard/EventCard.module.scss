@@ -82,6 +82,31 @@
   font-size: 14px;
 }
 
-.panelContent :global(.TypographyTitle) {
-  margin: 0;
+.panelContent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 12px 12px 40px 12px; // увеличен нижний отступ
+  box-sizing: border-box;
+  border-radius: inherit;
+  background-color: inherit;
+  min-height: 140px;
+}
+
+.dateWrapper {
+  position: absolute;
+  bottom: 8px;
+  right: 12px;
+  text-align: right;
+}
+
+.date {
+  font-size: 13px;
+  background: rgba(100, 9, 169, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  display: inline-block;
+  backdrop-filter: blur(2px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  color: #333;
 }
