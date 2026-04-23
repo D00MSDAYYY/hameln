@@ -116,26 +116,26 @@ export const EventCard = ({
         onClick={onMoreClick}
       >
         <Panel mode="primary" className={styles.panelContent}>
-  <div className={styles.header}>
-    <Typography.Title variant="medium-strong" className={styles.title}>
-      {name}
-    </Typography.Title>
-    <div className={styles.pointsBadge}>
-      <span className={styles.pointsValue}>{points}</span>
-    </div>
-  </div>
-  <Flex gap={8} wrap="wrap" style={{ marginTop: 8 }}>
-    {tags.map((tag, idx) => (
-      <span key={idx} className={styles.tag}>
-        🏷️ {tag}
-      </span>
-    ))}
-  </Flex>
-  {/* Дата теперь в потоке, прижата к правому краю и имеет автоматический отступ сверху */}
-  <div className={styles.dateWrapper}>
-    <span className={styles.date}>📅 {date}</span>
-  </div>
-</Panel>
+          <div className={styles.header}>
+            <Typography.Title variant="medium-strong" className={styles.title}>
+              {name}
+            </Typography.Title>
+            <div className={styles.pointsBadge}>
+              <span className={styles.pointsValue}>🏆 {points}</span>
+            </div>
+          </div>
+          <Flex gap={8} wrap="wrap" style={{ marginTop: 8 }}>
+            {tags.map((tag, idx) => (
+              <span key={idx} className={styles.tag}>
+                🏷️ {tag}
+              </span>
+            ))}
+          </Flex>
+          {/* Дата теперь в потоке, прижата к правому краю и имеет автоматический отступ сверху */}
+          <div className={styles.dateWrapper}>
+            <span className={styles.date}>📅 {date}</span>
+          </div>
+        </Panel>
       </div>
     </div>
   );

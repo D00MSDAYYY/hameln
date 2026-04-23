@@ -57,8 +57,8 @@ const Layout = () => {
           transition: 'background 0.2s ease',
         }}>
           <div style={{ padding: 16 }}>
+            {currentPage === 'profile' && <ProfilePage nickname="ivanov" points={150} />}
             {currentPage === 'home' && <HomePage />}
-            {currentPage === 'profile' && <ProfilePage />}
             {currentPage === 'notifications' && <NotificationsPage />}
           </div>
         </div>
