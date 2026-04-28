@@ -3,7 +3,7 @@ import { Typography, Panel, Switch, Input, IconButton, Flex } from '@maxhub/max-
 
 interface SettingsPanelProps {
   onBack: () => void;
-  company: string; // начальное название компании
+  company?: string; // начальное название компании
 }
 
 export const SettingsPanel = ({ onBack, company }: SettingsPanelProps) => {

@@ -1,6 +1,7 @@
-from pydantic import BaseModel # type: ignore
 from typing import Optional, List
-import uuid
+from datetime import datetime
+
+from pydantic import BaseModel, Field  # type: ignore
 
 
 class User(BaseModel):
@@ -9,6 +10,7 @@ class User(BaseModel):
     points: int
     company: Optional[str] = None
     password: str
+    role: str = "user"
 
 
 class LoginRequest(BaseModel):
@@ -24,15 +26,14 @@ class Event(BaseModel):
     date: str  # для простоты используем строку
     is_archived: bool = False
 
+
 class Registration(BaseModel):
     user_id: int
     event_id: int
 
 
-class EventResponse(BaseModel):
+class Notification(BaseModel):
     id: int
-    name: str
-    tags: List[str] = []
-    points: int = 0
-    date: str
-    is_registered: bool = False
+    title: str
+    body: Optional[str] = None
+    created_at: str = Field(default_factory=lambda: datetime.now().isoformat())

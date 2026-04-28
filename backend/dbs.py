@@ -1,7 +1,30 @@
-from models import *
-
+from models.responses import *
+from models.internal import *
 
 sessions_db = {}
+
+from datetime import datetime, timedelta
+
+notifications_db = [
+    Notification(
+        id=1,
+        title="Конференция уже завтра!",
+        body="Не забудьте посетить конференцию VK Mini Apps завтра в 10:00.",
+        created_at=(datetime.now() - timedelta(hours=2)).isoformat(),
+    ),
+    Notification(
+        id=2,
+        title="Новое событие добавлено",
+        body="Открыта регистрация на хакатон «Код здоровья».",
+        created_at=(datetime.now() - timedelta(days=1)).isoformat(),
+    ),
+    Notification(
+        id=3,
+        title="Изменение в расписании",
+        body="React мастер-класс перенесён на 20 июня 14:00.",
+        created_at=(datetime.now() - timedelta(days=2)).isoformat(),
+    ),
+]
 
 registrations_db = [
     Registration(user_id=1, event_id=1),  # ivanov идёт на конференцию VK
@@ -13,10 +36,27 @@ registrations_db = [
 
 users_db = [
     User(
-        id=1, nickname="ivanov", points=150, company="ООО Рога и Копыта", password="12"
+        id=1,
+        nickname="ivanov",
+        points=150,
+        company="ООО Рога и Копыта",
+        password="12",
     ),
-    User(id=2, nickname="petrov", points=200, company="ЗАО Пример", password="123"),
-    User(id=3, nickname="admin", points=999, company="Администрация", password="1234"),
+    User(
+        id=2,
+        nickname="petrov",
+        points=200,
+        company="ЗАО Пример",
+        password="123",
+    ),
+    User(
+        id=3,
+        nickname="admin",
+        points=999,
+        company="Администрация",
+        password="1234",
+        role="admin",
+    ),
 ]
 
 events_db = [

@@ -5,7 +5,7 @@ import uvicorn  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 from fastapi import FastAPI, HTTPException, Response, Request, Depends  # type: ignore
 
-from models import *
+from models.responses import *
 from dbs import *
 
 
@@ -36,6 +36,12 @@ def get_current_user(request: Request) -> User:
     user = next((u for u in users_db if u.id == user_id), None)
     if not user:
         raise HTTPException(status_code=401, detail="Пользователь не найден")
+    return user
+
+
+def ensure_admin(user: User = Depends(get_current_user)):
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Требуются права администратора")
     return user
 
 
@@ -105,6 +111,56 @@ async def get_events(user: User = Depends(get_current_user)):
             )
         )
     return result
+
+
+@app.get("/events/{event_id}", response_model=EventDetailResponse)
+async def get_event_detail(event_id: int, user: User = Depends(get_current_user)):
+    """Возвращает подробную информацию о событии."""
+    event = next((e for e in events_db if e.id == event_id), None)
+    if not event:
+        raise HTTPException(status_code=404, detail="Событие не найдено")
+    registered = any(
+        r.user_id == user.id and r.event_id == event_id for r in registrations_db
+    )
+    return EventDetailResponse(
+        id=event.id,
+        name=event.name,
+        description=event.description,
+        tags=event.tags,
+        points=event.points,
+        date=event.date,
+        is_registered=registered,
+    )
+
+
+@app.get("/notifications", response_model=List[NotificationResponse])
+async def get_notifications(user: User = Depends(get_current_user)):
+    return [
+        NotificationResponse(
+            id=n.id,
+            title=n.title,
+            body=n.body,
+            created_at=n.created_at,
+        )
+        for n in notifications_db
+    ]
+
+
+@app.get("/admin/events/archived", response_model=List[EventResponse])
+async def get_archived_events(admin: User = Depends(ensure_admin)):
+    archived = [e for e in events_db if e.is_archived]
+    return [
+        EventResponse(
+            id=e.id,
+            name=e.name,
+            tags=e.tags,
+            points=e.points,
+            date=e.date,
+            is_registered=False,  # архивные события не требуют регистрации
+        )
+        for e in archived
+    ]
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

@@ -2,15 +2,11 @@ import { useState } from 'react';
 import { MaxUI } from '@maxhub/max-ui';
 import Layout from './components/Layout';
 import LoginScreen from './components/LoginScreen';
+import type { UserProfile } from './api/types';
 
-export interface UserData {
-  nickname: string;
-  points: number;
-  company: string;
-}
 
 function App() {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
 
   if (!user) {
     return (

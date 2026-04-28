@@ -1,26 +1,8 @@
 import { useState } from 'react';
 import { Typography, Panel, CellList, CellSimple, Flex, IconButton } from '@maxhub/max-ui';
 import EditEventsPanel from '../components/AdminPanels/EditEventsPanel'
+import ArchiveEventsPanel from '../components/AdminPanels/ArchiveEventsPanel';
 
-const ArchiveEventsPanel = ({ onBack }: { onBack: () => void }) => (
-  <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-    <Panel
-      mode="primary"
-      style={{ flex: 1, display: 'flex', flexDirection: 'column', padding: 12, borderRadius: 16, overflow: 'hidden' }}
-    >
-      <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
-        <IconButton mode="tertiary" onClick={onBack}>
-          <span style={{ fontSize: 20 }}>←</span>
-        </IconButton>
-        <Typography.Title variant="medium-strong">Архив мероприятий</Typography.Title>
-        <div style={{ width: 48 }} />
-      </Flex>
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        <Typography.Body>Здесь будет список прошедших мероприятий.</Typography.Body>
-      </div>
-    </Panel>
-  </div>
-);
 
 const DebugConsolePanel = ({ onBack }: { onBack: () => void }) => (
   <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -78,7 +60,7 @@ const AdminPage = () => {
               onClick={() => setCurrentView('editEvents')}
             />
             <CellSimple
-              title="Архив мероприятий"
+              title="Архив всех мероприятий"
               showChevron
               onClick={() => setCurrentView('archiveEvents')}
             />

@@ -1,18 +1,10 @@
 import { useState, useRef, useCallback } from 'react';
 import { Panel, Typography, Flex } from '@maxhub/max-ui';
-import styles from './EventCard.module.scss';
-
-export interface EventInfo {
-  name: string;
-  tags: string[];
-  is_registered: boolean;
-  points: number;
-  date: string;
-  id: number;         // ← добавить
-}
+import styles from './EventCard.module.scss'
+import type { EventItem } from '../../api/types';
 
 interface EventCardProps {
-  eventInfo: EventInfo;
+  eventInfo: EventItem;
   onMoreClick: () => void;
   onRegisterSwapped: () => void;
   onUnregisterSwapped: () => void;
@@ -34,6 +26,23 @@ export const EventCard = ({
   const startXRef = useRef<number>(0);
   const currentOffsetRef = useRef<number>(0);
   const isDraggingRef = useRef<boolean>(false);
+
+  const formatEventDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      const weekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+      const weekday = weekdays[d.getDay()];
+      return `${hours}:${minutes}  ${weekday}  ${day}.${month}.${year}`;
+    } catch {
+      return dateStr;
+    }
+  };
+  const formattedDate = formatEventDate(date);
 
   const handleStart = useCallback((clientX: number) => {
     startXRef.current = clientX;
@@ -134,7 +143,7 @@ export const EventCard = ({
           </Flex>
           {/* Дата теперь в потоке, прижата к правому краю и имеет автоматический отступ сверху */}
           <div className={styles.dateWrapper}>
-            <span className={styles.date}>📅 {date}</span>
+            <span className={styles.date}>🗓️ {formatEventDate(date)}</span>
           </div>
         </Panel>
       </div>

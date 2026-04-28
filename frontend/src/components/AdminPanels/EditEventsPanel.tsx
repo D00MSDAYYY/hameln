@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Typography, Panel, CellList, CellSimple, Flex, IconButton, Button } from '@maxhub/max-ui';
-import { EventInfo } from '../EventCard/EventCard'; // предполагаем, что тип доступен
+import type { EventItem } from '../../api/types';
 
 // Моковые данные мероприятий (можно вынести в общий файл)
 const mockAdminEvents: EventInfo[] = [

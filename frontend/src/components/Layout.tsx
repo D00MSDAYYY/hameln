@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import { IconButton, Typography } from '@maxhub/max-ui';
 import EventsPage from '../pages/EventsPage';
-import { EventInfo } from './EventCard/EventCard';
 import ProfilePage from '../pages/ProfilePage';
 import NotificationsPage from '../pages/NotificationsPage';
 import AdminPage from '../pages/AdminPage';
-import {UserData }from '../App'
+import type { UserProfile } from '../api/types';
+
 
 const AdminIcon = () => <span style={{ fontSize: 24 }}>🔧</span>;
 const AccountIcon = () => <span style={{ fontSize: 24 }}>👤</span>;
 const NotificationsIcon = () => <span style={{ fontSize: 24 }}>🔔</span>;
 const EventIcon = () => <span style={{ fontSize: 24 }}>🎉</span>;
 
-const Layout = ({ user }: { user: UserData }) => {
+const Layout = ({ user }: { user: UserProfile }) => {
   const [currentPage, setCurrentPage] = useState('home');
 
   const handleEventClick = () => setCurrentPage('home');
