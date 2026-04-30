@@ -1,11 +1,10 @@
 import uuid
 from typing import Optional
-
+import random
 import uvicorn  # type: ignore
 from fastapi.middleware.cors import CORSMiddleware  # type: ignore
 from fastapi import FastAPI, HTTPException, Response, Request, Depends  # type: ignore
 
-from models.responses import *
 from dbs import *
 
 
@@ -40,7 +39,7 @@ def get_current_user(request: Request) -> User:
 
 
 def ensure_admin(user: User = Depends(get_current_user)):
-    if user.role != "admin":
+    if user.role != Roles.admin:
         raise HTTPException(status_code=403, detail="Требуются права администратора")
     return user
 
@@ -64,7 +63,7 @@ async def login(login_data: LoginRequest, response: Response):
         path="/",  # обязательно укажите корневой путь
         max_age=60 * 60 * 24,  # время жизни 24 часа
     )
-    return UserResponse(**user.model_dump())
+    return user
 
 
 @app.post("/logout")
@@ -79,32 +78,35 @@ async def logout(request: Request, response: Response):
 @app.get("/profile")
 async def get_profile(user: User = Depends(get_current_user)):
     """Возвращает профиль текущего авторизованного пользователя."""
-    return UserResponse(**user.model_dump())
+    return user
 
 
-@app.get("/events", response_model=List[EventResponse])
+@app.get("/events", response_model=List[Event])
 async def get_events(user: User = Depends(get_current_user)):
-    """Возвращает активные события, помечая те, на которые пользователь уже зарегистрирован."""
-    active_events = [e for e in events_db if not e.is_archived]
+    active = [e for e in events_db if not e.is_archived]
     result = []
-    for event in active_events:
+    for event in active:
         registered = any(
             r.user_id == user.id and r.event_id == event.id for r in registrations_db
         )
         result.append(
-            EventResponse(
-                id=event.id,
-                name=event.name,
-                tags=event.tags,
-                points=event.points,
-                date=event.date,
+            Event(
+                **event.model_dump(exclude={"is_registered"}),
                 is_registered=registered,
             )
         )
+    # Сортировка: сначала зарегистрированные, потом по дате
+    result.sort(key=lambda e: (not e.is_registered, e.date))
     return result
 
 
-@app.get("/events/{event_id}", response_model=EventDetailResponse)
+@app.get("/tags", response_model=List[Tag])
+async def get_tags(user: User = Depends(get_current_user)):
+    """Возвращает все доступные теги (для автодополнения и фильтрации)."""
+    return tags_db
+
+
+@app.get("/events/{event_id}", response_model=Event)
 async def get_event_detail(event_id: int, user: User = Depends(get_current_user)):
     """Возвращает подробную информацию о событии."""
     event = next((e for e in events_db if e.id == event_id), None)
@@ -113,81 +115,52 @@ async def get_event_detail(event_id: int, user: User = Depends(get_current_user)
     registered = any(
         r.user_id == user.id and r.event_id == event_id for r in registrations_db
     )
-    return EventDetailResponse(
-        id=event.id,
-        name=event.name,
-        description=event.description,
-        tags=event.tags,
-        points=event.points,
-        date=event.date,
+    return Event(
+        **event.model_dump(exclude={"is_registered"}),
         is_registered=registered,
-        link=event.link,
     )
 
 
-@app.get("/notifications", response_model=List[NotificationResponse])
+@app.get("/notifications", response_model=List[Notification])
 async def get_notifications(user: User = Depends(get_current_user)):
-    return [
-        NotificationResponse(
-            id=n.id,
-            title=n.title,
-            body=n.body,
-            created_at=n.created_at,
-        )
-        for n in notifications_db
-    ]
+    return [n for n in notifications_db]
 
 
-@app.get("/admin/events/archived", response_model=List[EventResponse])
+@app.get("/admin/events/archived", response_model=List[Event])
 async def get_archived_events(admin: User = Depends(ensure_admin)):
-    archived = [e for e in events_db if e.is_archived]
-    return [
-        EventResponse(
-            id=e.id,
-            name=e.name,
-            tags=e.tags,
-            points=e.points,
-            date=e.date,
-            is_registered=False,  # архивные события не требуют регистрации
-        )
-        for e in archived
-    ]
+    return [e for e in events_db if e.is_archived]
 
 
-@app.post("/events/{event_id}/register")
-async def register_for_event(event_id: int, user: User = Depends(get_current_user)):
-    """Зарегистрировать текущего пользователя на событие."""
-    event = next((e for e in events_db if e.id == event_id), None)
-    if not event:
-        raise HTTPException(status_code=404, detail="Событие не найдено")
-    if event.is_archived:
-        raise HTTPException(
-            status_code=400, detail="Нельзя зарегистрироваться на прошедшее событие"
-        )
-    if any(r.user_id == user.id and r.event_id == event_id for r in registrations_db):
-        raise HTTPException(status_code=409, detail="Вы уже зарегистрированы")
-    registrations_db.append(Registration(user_id=user.id, event_id=event_id))
-    return {"message": f"Вы зарегистрированы на событие '{event.name}'"}
+@app.post("/admin/events", response_model=Event)
+async def create_event(event_data: Event, admin: User = Depends(ensure_admin)):
+    """Создать новое событие."""
 
-
-@app.delete("/events/{event_id}/register")
-async def unregister_from_event(event_id: int, user: User = Depends(get_current_user)):
-    """Отменить регистрацию текущего пользователя."""
-    event = next((e for e in events_db if e.id == event_id), None)
-    if not event:
-        raise HTTPException(status_code=404, detail="Событие не найдено")
-    reg = next(
-        (
-            r
-            for r in registrations_db
-            if r.user_id == user.id and r.event_id == event_id
+    new_event = Event(
+        **event_data.model_dump(
+            exclude={"id"},
         ),
-        None,
+        id=random.randint(0, 10000000),
     )
-    if not reg:
-        raise HTTPException(status_code=404, detail="Регистрация не найдена")
-    registrations_db.remove(reg)
-    return {"message": f"Регистрация на событие '{event.name}' отменена"}
+    events_db.append(new_event)
+
+    return new_event
+
+
+@app.patch("/admin/events/{event_id}", response_model=Event)
+async def update_event(
+    event_id: int, event_data: Event, admin: User = Depends(ensure_admin)
+):
+    """Обновить существующее событие."""
+    event = next((e for e in events_db if e.id == event_id), None)
+    if not event:
+        raise HTTPException(status_code=404, detail="Событие не найдено")
+
+    # Применяем только те поля, которые были переданы (не равны значениям по умолчанию)
+    update_data = event_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(event, field, value)
+
+    return event
 
 
 if __name__ == "__main__":

@@ -41,7 +41,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
 
   const handleCreate = async (body: Record<string, any>) => {
     try {
-      const res = await fetch('/api/events', {
+      const res = await fetch('/api/admin/events', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
@@ -67,11 +67,12 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
   const handleUpdate = async (body: Record<string, any>) => {
     if (!editingEvent) return;
     try {
-      const res = await fetch(`/api/events/${editingEvent.id}`, {
+      const res = await fetch(`/api/admin/events/${editingEvent.id}`, {
         method: 'PATCH',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        // Отправляем все текущие поля формы + id события
+        body: JSON.stringify({ id: editingEvent.id, ...body }),
       });
       if (!res.ok) throw new Error('Ошибка обновления');
       await fetchEvents();
