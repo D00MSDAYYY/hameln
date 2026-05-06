@@ -75,7 +75,7 @@ fi
 source .env/bin/activate
 
 echo "  Installing Python dependencies (fastapi, uvicorn, pydantic)..."
-pip install fastapi uvicorn[standard] pydantic sqlmodel visible_fields_response
+pip install fastapi uvicorn[standard] pydantic sqlmodel pydantic_visible_fields
 
 echo "  Python dependencies already installed."
 fi
