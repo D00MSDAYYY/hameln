@@ -73,11 +73,11 @@ if [ ! -d ".env" ]; then
     python3 -m venv .env
 fi
 source .env/bin/activate
-if ! python -c "import fastapi" &>/dev/null; then
-    echo "  Installing Python dependencies (fastapi, uvicorn, pydantic)..."
-    pip install fastapi uvicorn[standard] pydantic sqlmodel
-else
-    echo "  Python dependencies already installed."
+
+echo "  Installing Python dependencies (fastapi, uvicorn, pydantic)..."
+pip install fastapi uvicorn[standard] pydantic sqlmodel visible_fields_response
+
+echo "  Python dependencies already installed."
 fi
 if [ ! -f "main.py" ]; then
     echo -e "${RED}Error: main.py not found in $BACKEND_DIR${NC}"
