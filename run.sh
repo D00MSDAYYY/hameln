@@ -15,22 +15,22 @@ BACKEND_PORT=8000
 FRONTEND_PORT=5173
 
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}   Запуск Event Manager (бэкенд + фронтенд)${NC}"
+echo -e "${GREEN}   Starting Event Manager (backend + frontend)${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 
-# ---------- Проверка инструментов ----------
-echo -e "${YELLOW}[1/5] Проверка окружения...${NC}"
+# ---------- Check prerequisites ----------
+echo -e "${YELLOW}[1/5] Checking environment...${NC}"
 if ! command -v python3 &>/dev/null; then
-    echo -e "${RED}Ошибка: python3 не найден. Установите Python 3.${NC}"
+    echo -e "${RED}Error: python3 not found. Please install Python 3.${NC}"
     exit 1
 fi
 if ! command -v node &>/dev/null; then
-    echo -e "${RED}Ошибка: Node.js не найден. Установите Node.js.${NC}"
+    echo -e "${RED}Error: Node.js not found. Please install Node.js.${NC}"
     exit 1
 fi
 if ! command -v npm &>/dev/null; then
-    echo -e "${RED}Ошибка: npm не найден. Установите npm.${NC}"
+    echo -e "${RED}Error: npm not found. Please install npm.${NC}"
     exit 1
 fi
 echo -e "  python3:  $(python3 --version 2>&1)"
@@ -38,7 +38,7 @@ echo -e "  node:     $(node -v 2>&1)"
 echo -e "  npm:      $(npm -v 2>&1)"
 echo ""
 
-# Функция проверки порта (сначала lsof, потом ss, потом netstat)
+# Function to check if a port is in use
 port_in_use() {
     local port=$1
     if command -v lsof &>/dev/null; then
@@ -48,12 +48,12 @@ port_in_use() {
     elif command -v netstat &>/dev/null; then
         netstat -tuln | grep -q ":$port "
     else
-        echo -e "${RED}Нет инструмента для проверки портов (lsof, ss, netstat). Установите lsof.${NC}"
+        echo -e "${RED}No tool to check ports (lsof, ss, netstat). Please install lsof.${NC}"
         exit 1
     fi
 }
 
-# Функция получения PID по порту
+# Function to get the PID of a process listening on a port
 get_pid_by_port() {
     local port=$1
     if command -v lsof &>/dev/null; then
@@ -65,113 +65,113 @@ get_pid_by_port() {
     fi
 }
 
-# ---------- Подготовка бэкенда ----------
-echo -e "${YELLOW}[2/5] Подготовка бэкенда...${NC}"
+# ---------- Backend setup ----------
+echo -e "${YELLOW}[2/5] Setting up backend...${NC}"
 cd "$BACKEND_DIR"
 if [ ! -d ".env" ]; then
-    echo "  Создаю виртуальное окружение .env..."
+    echo "  Creating Python virtual environment .env..."
     python3 -m venv .env
 fi
 source .env/bin/activate
 if ! python -c "import fastapi" &>/dev/null; then
-    echo "  Устанавливаю Python-зависимости (fastapi, uvicorn, pydantic)..."
+    echo "  Installing Python dependencies (fastapi, uvicorn, pydantic)..."
     pip install --quiet fastapi uvicorn[standard] pydantic sqlmodel
 else
-    echo "  Python-зависимости уже установлены."
+    echo "  Python dependencies already installed."
 fi
 if [ ! -f "main.py" ]; then
-    echo -e "${RED}Ошибка: файл main.py не найден в $BACKEND_DIR${NC}"
+    echo -e "${RED}Error: main.py not found in $BACKEND_DIR${NC}"
     exit 1
 fi
 echo ""
 
-# ---------- Подготовка фронтенда ----------
-echo -e "${YELLOW}[3/5] Подготовка фронтенда...${NC}"
+# ---------- Frontend setup ----------
+echo -e "${YELLOW}[3/5] Setting up frontend...${NC}"
 cd "$FRONTEND_DIR"
 if [ ! -d "node_modules" ]; then
-    echo "  Устанавливаю npm-пакеты..."
+    echo "  Installing npm packages..."
     npm install --silent
 else
-    echo "  npm-пакеты уже установлены."
+    echo "  npm packages already installed."
 fi
 echo ""
 
-# ---------- Проверка портов ----------
-echo -e "${YELLOW}[4/5] Проверка портов...${NC}"
+# ---------- Port check ----------
+echo -e "${YELLOW}[4/5] Checking ports...${NC}"
 for port in $BACKEND_PORT $FRONTEND_PORT; do
-    service_name="Бэкенд"
-    [ $port -eq $FRONTEND_PORT ] && service_name="Фронтенд"
+    service_name="Backend"
+    [ $port -eq $FRONTEND_PORT ] && service_name="Frontend"
     if port_in_use $port; then
-        echo -e "  Порт ${port} (${service_name}) уже занят."
-        read -p "  Завершить процесс на порту $port? (y/n): " -n 1 -r
+        echo -e "  Port ${port} (${service_name}) is already in use."
+        read -p "  Kill the process on port $port? (y/n): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             pid=$(get_pid_by_port $port)
             if [ -n "$pid" ]; then
-                kill "$pid" 2>/dev/null && echo "  Процесс PID $pid завершён."
+                kill "$pid" 2>/dev/null && echo "  Process PID $pid killed."
                 sleep 1
             fi
         else
-            echo -e "${RED}  Невозможно продолжить, порт $port занят.${NC}"
+            echo -e "${RED}  Cannot continue, port $port is in use.${NC}"
             exit 1
         fi
     fi
 done
 echo ""
 
-# ---------- Запуск серверов ----------
-echo -e "${GREEN}[5/5] Запуск серверов...${NC}"
+# ---------- Start servers ----------
+echo -e "${GREEN}[5/5] Starting servers...${NC}"
 
-# Бэкенд
-echo -e "  Запускаю бэкенд (uvicorn) на порту $BACKEND_PORT..."
+# Backend
+echo -e "  Launching backend (uvicorn) on port $BACKEND_PORT..."
 cd "$BACKEND_DIR"
 source .env/bin/activate
 nohup uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT > "$BACKEND_LOG" 2>&1 &
 BACKEND_PID=$!
-echo "  PID бэкенда: $BACKEND_PID"
-echo -n "  Ожидание готовности бэкенда"
+echo "  Backend PID: $BACKEND_PID"
+echo -n "  Waiting for backend to be ready"
 for i in {1..10}; do
     if port_in_use $BACKEND_PORT; then
-        echo -e " ${GREEN}✓ готов${NC}"
+        echo -e " ${GREEN}✓ ready${NC}"
         break
     fi
     sleep 1
     echo -n "."
 done
 if ! port_in_use $BACKEND_PORT; then
-    echo -e "\n${RED}Ошибка: бэкенд не запустился за 10 секунд.${NC}"
-    echo "Последние строки лога:"
+    echo -e "\n${RED}Error: backend did not start within 10 seconds.${NC}"
+    echo "Last 10 lines of log:"
     tail -n 10 "$BACKEND_LOG"
     exit 1
 fi
 
-# Фронтенд
-echo -e "  Запускаю фронтенд (Vite) на порту $FRONTEND_PORT..."
+# Frontend
+echo -e "  Launching frontend (Vite) on port $FRONTEND_PORT..."
 cd "$FRONTEND_DIR"
 nohup npm run dev -- --host > "$FRONTEND_LOG" 2>&1 &
 FRONTEND_PID=$!
-echo "  PID фронтенда: $FRONTEND_PID"
-echo -n "  Ожидание готовности фронтенда"
+echo "  Frontend PID: $FRONTEND_PID"
+echo -n "  Waiting for frontend to be ready"
 for i in {1..10}; do
     if port_in_use $FRONTEND_PORT; then
-        echo -e " ${GREEN}✓ готов${NC}"
+        echo -e " ${GREEN}✓ ready${NC}"
         break
     fi
     sleep 1
     echo -n "."
 done
 if ! port_in_use $FRONTEND_PORT; then
-    echo -e "\n${RED}Ошибка: фронтенд не запустился за 10 секунд.${NC}"
-    echo "Последние строки лога:"
+    echo -e "\n${RED}Error: frontend did not start within 10 seconds.${NC}"
+    echo "Last 10 lines of log:"
     tail -n 10 "$FRONTEND_LOG"
     exit 1
 fi
 
 echo ""
 echo -e "${GREEN}========================================${NC}"
-echo -e "${GREEN}  Оба сервера успешно запущены!${NC}"
-echo -e "${GREEN}  Бэкенд:  http://<IP>:$BACKEND_PORT${NC}"
-echo -e "${GREEN}  Фронтенд: http://<IP>:$FRONTEND_PORT${NC}"
-echo -e "${GREEN}  Логи бэкенда:  $BACKEND_LOG${NC}"
-echo -e "${GREEN}  Логи фронтенда: $FRONTEND_LOG${NC}"
+echo -e "${GREEN}  Both servers started successfully!${NC}"
+echo -e "${GREEN}  Backend:  http://<IP>:$BACKEND_PORT${NC}"
+echo -e "${GREEN}  Frontend: http://<IP>:$FRONTEND_PORT${NC}"
+echo -e "${GREEN}  Backend log:  $BACKEND_LOG${NC}"
+echo -e "${GREEN}  Frontend log: $FRONTEND_LOG${NC}"
 echo -e "${GREEN}========================================${NC}"
