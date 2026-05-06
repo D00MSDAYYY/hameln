@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Typography, Panel, Flex, IconButton, Button } from '@maxhub/max-ui';
 import { EventFormPanel } from './EventFormPanel';
 import { AttendantsPanel } from './AttendantsPanel';
-import type { EventItem, UserSearchItem } from '../../api/types';
-
+import type { EventInfoResponse } from '../../api/types';
+ 
 const formatDate = (dateStr: string) => {
   try {
     const d = new Date(dateStr);
@@ -15,10 +15,10 @@ const formatDate = (dateStr: string) => {
 };
 
 const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
-  const [events, setEvents] = useState<EventItem[]>([]);
+  const [events, setEvents] = useState<EventInfoResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState<'list' | 'create' | 'edit' | 'attendants'>('list');
-  const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
+  const [editingEvent, setEditingEvent] = useState<EventInfoResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [attendants, setAttendants] = useState<UserSearchItem[]>([]);
 
@@ -27,7 +27,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
       setLoading(true);
       const res = await fetch('/api/admin/events', { credentials: 'include' });
       if (!res.ok) throw new Error('Ошибка загрузки');
-      const data: EventItem[] = await res.json();
+      const data: EventInfoResponse[] = await res.json();
       data.sort((a, b) => {
         if (a.is_archived !== b.is_archived) return a.is_archived ? 1 : -1;
         return a.date.localeCompare(b.date);
@@ -70,11 +70,11 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
-  const handleEditClick = async (event: EventItem) => {
+  const handleEditClick = async (event: EventInfoResponse) => {
     try {
       const detailRes = await fetch(`/api/events/${event.id}`, { credentials: 'include' });
       if (!detailRes.ok) throw new Error('Ошибка загрузки события');
-      const detail: EventItem = await detailRes.json();
+      const detail: EventInfoResponse = await detailRes.json();
       setEditingEvent(detail);
       setCurrentView('edit');
     } catch (err: any) {
@@ -103,7 +103,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
     }
   };
 
-  const handleAttendantsClick = async (event: EventItem) => {
+  const handleAttendantsClick = async (event: EventInfoResponse) => {
     try {
       const attRes = await fetch(`/api/admin/events/${event.id}/attendants`, {
         credentials: 'include',
@@ -227,7 +227,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
                 <Flex justify="space-between" align="center">
                   <Typography.Body style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
                     {event.is_archived && <span>📦</span>}
-                    {event.name}
+                    {event.title}
                   </Typography.Body>
                   <Typography.Body
                     style={{
@@ -259,7 +259,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
                     <Button
                       mode="tertiary"
                       size="small"
-                      onClick={() => handleDelete(event.id, event.name)}
+                      onClick={() => handleDelete(event.id, event.title)}
                       style={{ backgroundColor: '#d32f2f', color: '#fff' }}
                     >
                       🗑️

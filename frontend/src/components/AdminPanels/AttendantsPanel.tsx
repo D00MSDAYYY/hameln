@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Typography, Panel, Flex, Button } from '@maxhub/max-ui';
 import { AttendantsEditor } from './AttendantsEditor';
-import type { UserSearchItem, EventItem } from '../../api/types';
+import type {  EventInfoResponse } from '../../api/types';
 
 interface AttendantsPanelProps {
-  event: EventItem;
+  event: EventInfoResponse;
   initialAttendants: UserSearchItem[];
   onSave: (attendantIds: number[]) => Promise<void>;
   onBack: () => void;
@@ -31,7 +31,7 @@ export const AttendantsPanel = ({
             ← Назад
           </Button>
           <Typography.Title variant="medium-strong">
-            Посетители: {event.name}
+            Посетители: {event.title}
           </Typography.Title>
           <div style={{ width: 48 }} />
         </Flex>

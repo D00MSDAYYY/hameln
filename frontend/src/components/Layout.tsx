@@ -4,14 +4,14 @@ import EventsPage from '../pages/EventsPage';
 import ProfilePage from '../pages/ProfilePage';
 import NotificationsPage from '../pages/NotificationsPage';
 import AdminPage from '../pages/AdminPage';
-import type { UserProfile } from '../api/types';
+import type { UserInfoResponse } from '../api/types';
 
 
 
 
 
 interface LayoutProps {
-  user: UserProfile;
+  user: UserInfoResponse;
 }
 
 const Layout = ({ user }: LayoutProps) => {

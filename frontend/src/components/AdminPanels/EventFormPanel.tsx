@@ -1,51 +1,74 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Typography, Panel, Flex, Button, Input, Switch } from '@maxhub/max-ui';
 import TagSelector from './TagSelector/TagSelector';
-import type { EventItem } from '../../api/types';
+import type { EventInfoResponse, TagInfoResponse } from '../../api/types';
 
 interface EventFormPanelProps {
-  initial?: EventItem;
+  initial?: EventInfoResponse;
   onSave: (body: Record<string, any>) => void | Promise<void>;
   onCancel: () => void;
 }
 
+const safeToLocalDatetime = (raw?: string | null): string => {
+  if (!raw) return '';
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? '' : d.toISOString().slice(0, 16);
+};
+
+const localToISO = (local: string): string | null => {
+  if (!local) return null;
+  const d = new Date(local);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+};
+
 export const EventFormPanel = ({ initial, onSave, onCancel }: EventFormPanelProps) => {
-  const [name, setName] = useState(initial?.name || '');
+  const defaultDate = useMemo(() => new Date().toISOString().slice(0, 16), []);
+
+  const [title, setTitle] = useState(initial?.title || '');
   const [description, setDescription] = useState(initial?.description || '');
   const [points, setPoints] = useState(String(initial?.points ?? 0));
-  const [date, setDate] = useState(initial?.date ? initial.date.slice(0, 16) : '');
+  const [date, setDate] = useState(initial?.date ? safeToLocalDatetime(initial.date) : defaultDate);
   const [link, setLink] = useState(initial?.link || '');
   const [isArchived, setIsArchived] = useState(initial?.is_archived ?? false);
-  const [selectedTags, setSelectedTags] = useState<string[]>(initial?.tags || []);
+  const [selectedTags, setSelectedTags] = useState<TagInfoResponse[]>(initial?.tags || []);
+  const [dateError, setDateError] = useState<string | null>(null);
 
   useEffect(() => {
     if (initial) {
-      setName(initial.name || '');
+      setTitle(initial.title || '');
       setDescription(initial.description || '');
       setPoints(String(initial.points ?? 0));
-      setDate(initial.date ? initial.date.slice(0, 16) : '');
+      setDate(safeToLocalDatetime(initial.date) || defaultDate);
       setLink(initial.link || '');
       setIsArchived(initial.is_archived ?? false);
       setSelectedTags(initial.tags || []);
     } else {
-      setName('');
+      setTitle('');
       setDescription('');
       setPoints('0');
-      setDate('');
+      setDate(defaultDate);
       setLink('');
       setIsArchived(false);
       setSelectedTags([]);
     }
-  }, [initial]);
+  }, [initial, defaultDate]);
 
   const handleSubmit = () => {
-    if (!name.trim()) return;
+    if (!title.trim()) return;
+
+    const isoDate = localToISO(date);
+    if (!isoDate) {
+      setDateError('Некорректная дата');
+      return;
+    }
+    setDateError(null);
+
     const body = {
-      name,
+      title,
       description: description || null,
       tags: selectedTags,
       points: parseInt(points, 10) || 0,
-      date: new Date(date).toISOString(),
+      date: isoDate,
       link: link || null,
       is_archived: isArchived,
     };
@@ -57,7 +80,7 @@ export const EventFormPanel = ({ initial, onSave, onCancel }: EventFormPanelProp
       <div>
         <Typography.Title variant="small-strong">Название</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input placeholder="Введите название" value={name} onChange={(e) => setName(e.target.value)} />
+          <Input placeholder="Введите название" value={title} onChange={(e) => setTitle(e.target.value)} />
         </Panel>
       </div>
 
@@ -71,7 +94,10 @@ export const EventFormPanel = ({ initial, onSave, onCancel }: EventFormPanelProp
       <div>
         <Typography.Title variant="small-strong">Теги</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <TagSelector selected={selectedTags} onChange={(newTags) => setSelectedTags(newTags)} />
+          <TagSelector
+            selected={selectedTags}
+            onChange={(newTags: TagInfoResponse[]) => setSelectedTags(newTags)}
+          />
         </Panel>
       </div>
 
@@ -85,7 +111,12 @@ export const EventFormPanel = ({ initial, onSave, onCancel }: EventFormPanelProp
       <div>
         <Typography.Title variant="small-strong">Дата и время</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input type="datetime-local" value={date} onChange={(e) => setDate(e.target.value)} />
+          <Input
+            type="datetime-local"
+            value={date}
+            onChange={(e) => { setDate(e.target.value); setDateError(null); }}
+          />
+          {dateError && <Typography.Body style={{ color: 'red', marginTop: 4 }}>{dateError}</Typography.Body>}
         </Panel>
       </div>
 

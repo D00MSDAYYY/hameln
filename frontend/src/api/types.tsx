@@ -9,34 +9,34 @@ export type AppTheme = "dark" | "light";
 export type Role = "admin" | "user" | "observer";
 
 export interface EventInfoResponse {
-  id: number | null;
-  title: string;
-  points: number;
-  date: string;
-  tags: TagInfoResponse[] | null;
-  description: string | null;
-  link: string | null;
-  is_archived: boolean;
-  is_registered: boolean;
-  created_at: string;
+  id?: number | null;
+  title?: string | null;
+  points?: number | null;
+  date?: string | null;
+  tags?: TagInfoResponse[] | null;
+  description?: string | null;
+  link?: string | null;
+  is_archived?: boolean | null;
+  is_registered?: boolean | null;
+  created_at?: string | null;
 }
 export interface TagInfoResponse {
-  id: number | null;
-  name: string;
+  id?: number | null;
+  title?: string | null;
 }
 export interface LoginRequest {
   password: string;
 }
 export interface NotificationInfoResponse {
-  id: number | null;
-  title: string;
-  body: string | null;
-  created_at: string;
+  id?: number | null;
+  title?: string | null;
+  body?: string | null;
+  created_at?: string | null;
 }
 export interface SettingsResponse {
-  app_theme: AppTheme;
-  days_to_notify: number;
-  do_notify: boolean;
+  app_theme?: AppTheme | null;
+  days_to_notify?: number | null;
+  do_notify?: boolean | null;
 }
 export interface UserInfoResponse {
   id?: number | null;

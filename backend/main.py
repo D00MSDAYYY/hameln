@@ -326,7 +326,9 @@ def update_settings(
         **new_settings.model_dump(exclude_unset=True),
     }
     validated = Settings(**updated_dict)
-    user_settings.settings = validated.model_dump(mode='json')  # присвоение, а не .update()
+    user_settings.settings = validated.model_dump(
+        mode="json"
+    )  # присвоение, а не .update()
 
     session.add(user_settings)
     session.commit()
@@ -364,7 +366,7 @@ async def create_event(
     for tag_response in event_data.tags:  # type: ignore
         tag_name = tag_response.name
         # Ищем существующий тег или создаём новый
-        tag = session.exec(select(Tag).where(Tag.name == tag_name)).first()
+        tag = session.exec(select(Tag).where(tag.title == tag_name)).first()
 
         if not tag:
             tag = Tag(name=tag_name)
@@ -410,7 +412,7 @@ async def update_event(
         # Добавляем новые
         for tag_response in event_data.tags:
             tag_name = tag_response.name
-            tag = session.exec(select(Tag).where(Tag.name == tag_name)).first()
+            tag = session.exec(select(Tag).where(tag.title == tag_name)).first()
 
             if not tag:
                 tag = Tag(name=tag_name)

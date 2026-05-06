@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Panel, Typography, Flex, IconButton } from '@maxhub/max-ui';
-import type { EventItem } from '../../api/types';
+import type { EventInfoResponse } from '../../api/types';
 
 
 interface ArchiveEventsPanelProps {
@@ -8,7 +8,7 @@ interface ArchiveEventsPanelProps {
 }
 
 const ArchiveEventsPanel = ({ onBack }: ArchiveEventsPanelProps) => {
-  const [events, setEvents] = useState<EventItem[]>([]);
+  const [events, setEvents] = useState<EventInfoResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -20,7 +20,7 @@ const ArchiveEventsPanel = ({ onBack }: ArchiveEventsPanelProps) => {
           credentials: 'include',
         });
         if (!res.ok) throw new Error('Ошибка загрузки архива');
-        const data: EventItem[] = await res.json();
+        const data: EventInfoResponse[] = await res.json();
         setEvents(data);
       } catch (err: any) {
         setError(err.message || 'Неизвестная ошибка');
@@ -62,7 +62,7 @@ const ArchiveEventsPanel = ({ onBack }: ArchiveEventsPanelProps) => {
             events.map((event) => (
               <Panel key={event.id} mode="secondary" style={{ padding: 12, borderRadius: 12, marginBottom: 8 }}>
                 <Flex justify="space-between" align="center">
-                  <Typography.Body style={{ flex: 1 }}>{event.name}</Typography.Body>
+                  <Typography.Body style={{ flex: 1 }}>{event.title}</Typography.Body>
                   <Typography.Body style={{ flex: 1, textAlign: 'center', color: 'var(--text-secondary)' }}>
                     {event.date}
                   </Typography.Body>

@@ -1,24 +1,35 @@
-INFO:     Started server process [68086]
+INFO:     Started server process [71059]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     127.0.0.1:54692 - "GET /profile HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:54693 - "GET /profile HTTP/1.1" 401 Unauthorized
-INFO:     127.0.0.1:54694 - "POST /login HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54695 - "GET /events HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54696 - "GET /events HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54697 - "GET /settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54699 - "GET /settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54702 - "PATCH /profile HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54703 - "PATCH /settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54705 - "PATCH /profile HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54707 - "PATCH /settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54709 - "GET /events HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54711 - "GET /events HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54713 - "GET /settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54715 - "GET /settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54719 - "GET /profile HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54724 - "GET /events HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54723 - "GET /events HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54729 - "GET /settings HTTP/1.1" 200 OK
-INFO:     127.0.0.1:54727 - "GET /settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55680 - "GET /profile HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55681 - "GET /profile HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55682 - "GET /profile HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55683 - "POST /login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55684 - "GET /events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55685 - "GET /events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55688 - "GET /admin/events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55690 - "GET /admin/events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55693 - "GET /events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55694 - "GET /events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55697 - "GET /events/1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55700 - "GET /events/3 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55713 - "GET /profile HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55717 - "POST /events/2/register HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55718 - "GET /events/2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55720 - "POST /events/3/register HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55722 - "DELETE /events/3/register HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55726 - "GET /settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55725 - "GET /settings HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55730 - "GET /events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55731 - "GET /events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55733 - "POST /events/3/register HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55735 - "POST /events/4/register HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55737 - "POST /logout HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55742 - "GET /profile HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55743 - "GET /profile HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:55744 - "POST /login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55747 - "GET /events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55748 - "GET /events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55751 - "GET /admin/events HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55752 - "GET /admin/events HTTP/1.1" 200 OK

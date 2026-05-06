@@ -53,7 +53,7 @@ export const EventInfoDisplayer = ({ event, onBack }: EventInfoDisplayerProps) =
               borderRadius: 8,
               fontSize: 14,
             }}>
-              🏷️ {tag.name}
+              🏷️ {tag.title}
             </span>
           ))}
           {points > 0 && (
@@ -103,3 +103,5 @@ export const EventInfoDisplayer = ({ event, onBack }: EventInfoDisplayerProps) =
     </div>
   );
 };
+
+export default EventInfoDisplayer;

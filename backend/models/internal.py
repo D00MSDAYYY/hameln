@@ -41,7 +41,7 @@ class EventTagLink(SQLModel, table=True):
 
 class Tag(SQLModel, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    name: str
+    title: str
 
     events: List["Event"] = Relationship(back_populates="tags", link_model=EventTagLink)
 

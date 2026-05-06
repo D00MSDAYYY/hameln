@@ -147,9 +147,16 @@ export const EventCard = ({
             </div>
           </div>
           <Flex gap={8} wrap="wrap" style={{ marginTop: 8 }}>
-            {tags.map((tag: TagInfoResponse) => (
-              <span key={tag.id}>{tag.title}</span>  // ✅ правильно
-            ))}
+            {tags.map((tag: TagInfoResponse, idx) => (
+            <span key={idx} style={{
+              background: 'var(--background-secondary, #f0f0f0)',
+              padding: '4px 8px',
+              borderRadius: 8,
+              fontSize: 14,
+            }}>
+              🏷️ {tag.title}
+            </span>
+          ))}
           </Flex>
           <div className={styles.dateWrapper}>
             <span className={styles.date}>🗓️ {formatEventDate(date)}</span>
@@ -159,3 +166,5 @@ export const EventCard = ({
     </div>
   );
 };
+
+export default EventCard;
