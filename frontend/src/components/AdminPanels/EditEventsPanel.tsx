@@ -72,7 +72,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
 
   const handleEditClick = async (event: EventInfoResponse) => {
     try {
-      const detailRes = await fetch(`/api/events/${event.id}`, { credentials: 'include' });
+      const detailRes = await fetch(`/api/user/events/${event.id}`, { credentials: 'include' });
       if (!detailRes.ok) throw new Error('Ошибка загрузки события');
       const detail: EventInfoResponse = await detailRes.json();
       setEditingEvent(detail);

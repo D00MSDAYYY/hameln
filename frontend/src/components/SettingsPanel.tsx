@@ -17,7 +17,7 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
   const [middlename, setMiddlename] = useState(user.middlename ?? '');
   const [company, setCompany] = useState(user.company ?? '');
 
-  // ---- технические настройки (из /settings) ----
+  // ---- технические настройки (из /user/settings) ----
   const [appTheme, setAppTheme] = useState('light');
   const [doNotify, setDoNotify] = useState(true);
   const [daysToNotify, setDaysToNotify] = useState('3');
@@ -25,7 +25,7 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
 
   // Загружаем настройки при монтировании
   useEffect(() => {
-    fetch('/api/settings', { credentials: 'include' })
+    fetch('/api/user/settings', { credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setAppTheme(data.app_theme ?? 'light');
@@ -50,13 +50,13 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
 
     try {
       const [profileRes, settingsRes] = await Promise.all([
-        fetch('api/profile', {
+        fetch('api/user/profile', {
           method: 'PATCH',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(profileBody),
         }),
-        fetch('/api/settings', {
+        fetch('/api/user/settings', {
           method: 'PATCH',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

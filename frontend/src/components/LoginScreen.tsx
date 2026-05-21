@@ -12,7 +12,7 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const handleSubmit = async () => {
     setError('');
     try {
-      const res = await fetch('api/login', {
+      const res = await fetch('api/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // чтобы куки отправлялись

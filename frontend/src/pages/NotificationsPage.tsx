@@ -12,7 +12,7 @@ const NotificationsPage = () => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/notifications', { credentials: 'include' });
+        const res = await fetch('/api/user/notifications', { credentials: 'include' });
         if (!res.ok) throw new Error('Ошибка загрузки уведомлений');
         const data: NotificationItem[] = await res.json();
         setNotifications(data);

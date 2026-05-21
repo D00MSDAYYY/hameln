@@ -28,7 +28,7 @@ export const AttendantsEditor = ({ value, onChange, disabled }: AttendantsEditor
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/users/search?q=${encodeURIComponent(q)}`, {
+      const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}`, {
         credentials: 'include',
       });
       if (res.ok) {

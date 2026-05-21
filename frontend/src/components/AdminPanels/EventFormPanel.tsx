@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Typography, Panel, Flex, Button, Input, Switch } from '@maxhub/max-ui';
-import TagSelector from './TagSelector/TagSelector';
+import TagSelector from './user/tagselector/user/tagselector';
 import type { EventInfoResponse, TagInfoResponse } from '../../api/types';
 
 interface EventFormPanelProps {

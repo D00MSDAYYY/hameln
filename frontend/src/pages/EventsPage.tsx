@@ -14,7 +14,7 @@ const EventsPage = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/events', { credentials: 'include' });
+        const res = await fetch('/api/user/events', { credentials: 'include' });
         if (!res.ok) throw new Error('Ошибка загрузки событий');
         const data: EventInfoResponse[] = await res.json();
         setEvents(data);
@@ -30,7 +30,7 @@ const EventsPage = () => {
 
 
   const handleMoreClick = async (eventId: number) => {
-    const res = await fetch(`/api/events/${eventId}`, { credentials: 'include' });
+    const res = await fetch(`/api/user/events/${eventId}`, { credentials: 'include' });
     const detail: EventInfoResponse = await res.json();
     setSelectedEvent(detail);
   };
@@ -39,7 +39,7 @@ const EventsPage = () => {
 
   const handleRegisterSwapped = async (eventId: number) => {
     try {
-      const res = await fetch(`/api/events/${eventId}/register`, {
+      const res = await fetch(`/api/user/events/${eventId}/register`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -58,7 +58,7 @@ const EventsPage = () => {
 
   const handleUnregisterSwapped = async (eventId: number) => {
     try {
-      const res = await fetch(`/api/events/${eventId}/register`, {
+      const res = await fetch(`/api/user/events/${eventId}/register`, {
         method: 'DELETE',
         credentials: 'include',
       });

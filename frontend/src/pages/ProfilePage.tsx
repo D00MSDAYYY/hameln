@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Typography, Panel, CellList, CellSimple, Flex, Button } from '@maxhub/max-ui';
-import { SettingsPanel } from '../components/SettingsPanel';
+import { SettingsPanel } from '../components/user/settingsPanel';
 import { UserInfoResponse } from '../api/types';
 
 interface ProfilePageProps {
@@ -14,7 +14,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
   const handleLogout = async () => {
     console.log('Нажата кнопка Выйти'); // <-- добавьте это для проверки в консоли
     try {
-      const res = await fetch('api/logout', { method: 'POST', credentials: 'include' });
+      const res = await fetch('api/user/logout', { method: 'POST', credentials: 'include' });
       console.log('Ответ сервера:', res.status); // посмотрим статус
       if (!res.ok) {
         console.error('Сервер вернул ошибку', res.status);

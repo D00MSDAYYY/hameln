@@ -17,8 +17,8 @@ export const TagSelector = ({ selected, onChange }: TagSelectorProps) => {
 
   // Загрузка всех тегов с сервера
   useEffect(() => {
-    console.log('[TagSelector] Загружаю теги с /tags ...');
-    fetch('/api/tags', { credentials: 'include' })
+    console.log('[TagSelector] Загружаю теги с /user/tags ...');
+    fetch('/api/user/tags', { credentials: 'include' })
       .then(async res => {
         console.log('[TagSelector] Статус ответа:', res.status);
         if (!res.ok) {

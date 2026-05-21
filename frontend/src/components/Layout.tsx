@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { IconButton, Typography, Button, Flex } from '@maxhub/max-ui';
-import EventsPage from '../pages/EventsPage';
-import ProfilePage from '../pages/ProfilePage';
-import NotificationsPage from '../pages/NotificationsPage';
+import EventsPage from '../pages/user/eventsPage';
+import ProfilePage from '../pages/user/profilePage';
+import NotificationsPage from '../pages/user/notificationsPage';
 import AdminPage from '../pages/AdminPage';
 import type { UserInfoResponse } from '../api/types';
 

@@ -1,6 +1,5 @@
-from pathlib import Path
 from sqlalchemy import event
-from sqlmodel import SQLModel, Session, create_engine
+
 
 from models.internal import *
 from models.external import *
@@ -133,7 +132,7 @@ def init_db():
                 description="Ежегодная конференция для разработчиков мини-приложений ВКонтакте.",
                 points=150,
                 date=datetime(2025, 6, 15, 10, 0),
-                link="https://vk.com/dev/events",
+                link="https://vk.com/dev/user/events",
                 is_archived=False,
             ),
             Event(
@@ -233,7 +232,3 @@ def init_db():
         session.commit()
 
 
-def get_session():
-    """Зависимость FastAPI для получения сессии БД."""
-    with Session(engine) as session:
-        yield session

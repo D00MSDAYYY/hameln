@@ -141,11 +141,11 @@ echo ""
 # ---------- Backend setup ----------
 echo -e "${YELLOW}[3/6] Setting up backend...${NC}"
 cd "$BACKEND_DIR"
-if [ ! -d ".env" ]; then
-    echo "  Creating Python virtual environment .env..."
-    python3 -m venv .env
+if [ ! -d ".venv" ]; then
+    echo "  Creating Python virtual environment .venv..."
+    python3 -m venv .venv
 fi
-source .env/bin/activate
+source .venv/bin/activate
 
 echo "  Installing Python dependencies..."
 pip install -r requirements.txt --quiet
@@ -206,7 +206,7 @@ echo -e "${GREEN}[6/6] Starting servers...${NC}"
 # Backend
 echo -e "  Launching backend (uvicorn) on port $BACKEND_PORT..."
 cd "$BACKEND_DIR"
-source .env/bin/activate
+source .venv/bin/activate
 # Ensure log file exists
 touch "$BACKEND_LOG"
 nohup uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT > "$BACKEND_LOG" 2>&1 &
