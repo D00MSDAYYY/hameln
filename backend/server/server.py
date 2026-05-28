@@ -1,18 +1,25 @@
 import os
 from datetime import date
+
 from dotenv import load_dotenv
+from contextlib import asynccontextmanager
+
+import logging
+import sys, traceback
+
+traceback.print_exc(file=sys.stdout)
 
 import redis
 
 from sqlmodel import Session, create_engine
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI, Response, Request
+from fastapi import FastAPI, Response, Request, Depends
 
+from server.aux import *
+from server.user_session_storage import UserSessionStorage
 from models.internal import *
 from models.external import *
-from server.user_session_storage import UserSessionStorage
-from server.aux import *
 
 load_dotenv(".env")
 
@@ -20,25 +27,42 @@ SESSION_TTL = int(os.getenv("SESSION_TTL", "86400"))
 VERIFICATION_CODE_TTL = int(os.getenv("VERIFICATION_CODE_TTL", "300"))
 BACKEND_DIR = str(os.getenv("BACKEND_DIR", "."))
 
+_db = create_engine(f"sqlite:///{BACKEND_DIR}/hameln.db", echo=False)
 
-db = create_engine(f"sqlite:///{BACKEND_DIR}/hameln.db", echo=False)
+
+def init_database():
+    SQLModel.metadata.create_all(_db)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_database()
+    yield
 
 
 def get_db_session():
-    with Session(db) as session:
+    with Session(_db) as session:
         yield session
 
 
-user_sessions_storage = UserSessionStorage(
-    redis.Redis(
-        host="localhost", port=6379, decode_responses=True
-    ),  # TODO host port move to env
-    SESSION_TTL,
+def get_session_storage() -> UserSessionStorage:
+    redis_host = os.getenv("REDIS_HOST", "localhost")
+    redis_port = int(os.getenv("REDIS_PORT", "6379"))
+    session_ttl = int(os.getenv("SESSION_TTL", "86400"))
+
+    redis_client = redis.Redis(
+        host=redis_host,
+        port=redis_port,
+        decode_responses=True,
+    )
+    return UserSessionStorage(redis_client, session_ttl)
+
+
+server = FastAPI(
+    title="Event Manager API",
+    version="0.4.0",
+    lifespan=lifespan,
 )
-
-
-server = FastAPI(title="Event Manager API", version="0.4.0")
-
 
 server.add_middleware(
     CORSMiddleware,
@@ -47,6 +71,7 @@ server.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
+logging.info("hello world1")
 
 
 @server.exception_handler(Exception)
@@ -54,205 +79,273 @@ async def global_exception_handler(
     request: Request,
     exc: Exception,
 ):
+    traceback.print_exc()
     return JSONResponse(
         status_code=500,
         content={"detail": "Внутренняя ошибка сервера"},
     )
 
 
-@server.post("/user/login", response_model=UserInfoResponse)
-async def login(
-    login_data: LoginRequest,
+@server.post("/user/signup", response_model=UserInfoResponse)
+async def signup(
+    body: SignupRequest,
     response: Response,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
-    from server.user.login.post import f
+    logging.info("hello world3")
 
-    return f(login_data, response, get_db_session(), user_sessions_storage)
+    from server.user.signup.post import f
+
+    try:
+        return f(body, response, db, session_storage)
+    except Exception as e:
+        import traceback
+
+        traceback.print_exc()
+        raise
+
+
+logging.info("hello world2")
+
+
+# @server.post("/user/login", response_model=UserInfoResponse)
+# async def login(
+#     login_data: LoginRequest,
+#     response: Response,
+#     db: Session = Depends(get_db_session),
+#     session_storage: UserSessionStorage = Depends(get_session_storage),
+# ):
+#     from server.user.login.post import f
+#     return f(login_data, response, db, session_storage)
 
 
 @server.post("/user/logout")
 async def logout(
     request: Request,
     response: Response,
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.user.logout.post import f
 
-    return f(request, response, user_sessions_storage)
+    return f(request, response, session_storage)
 
 
 @server.get("/user/profile", response_model=UserInfoResponse)
-async def get_profile():
+async def get_profile(
+    request: Request,   
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
     from server.user.profile.get import f
 
     return f(
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         )
     )
 
 
 @server.patch("/user/profile", response_model=UserInfoResponse)
 async def update_profile(
+    request: Request,   
     profile_data: UserInfoResponse,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.user.profile.patch import f
 
     return f(
         profile_data,
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.get("/user/events", response_model=List[EventInfoResponse])
-async def get_events():
+async def get_events(
+    request: Request,   
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
     from server.user.events.get import f
 
     return f(
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.get("/user/events/{event_id}", response_model=EventInfoResponse)
 async def get_event_detail(
+    request: Request,   
     event_id: int,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.user.events.event_id.get import f
 
     return f(
         event_id,
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.post("/user/events/{event_id}/register")
 async def register_for_event(
+    request: Request,   
     event_id: int,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.user.events.event_id.register.post import f
 
     return f(
         event_id,
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.delete("/user/events/{event_id}/register")
 async def unregister_from_event(
+    request: Request,   
     event_id: int,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.user.events.event_id.register.delete import f
 
     return f(
         event_id,
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.get("/user/tags", response_model=List[TagInfoResponse])
-async def get_tags():
+async def get_tags(
+    request: Request,   
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
     from server.user.tags.get import f
 
     return f(
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.get("/user/notifications", response_model=List[NotificationInfoResponse])
-async def get_notifications():
+async def get_notifications(
+    request: Request,   
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
     from server.user.notifications.get import f
 
     return f(
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.get("/user/settings", response_model=SettingsResponse)
-async def get_settings():
+async def get_settings(
+    request: Request,   
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
     from server.user.settings.get import f
 
     return f(
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.patch("/user/settings", response_model=SettingsResponse)
 async def update_settings(
+    request: Request,   
     new_settings: SettingsResponse,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from user.settings.patch import f
 
     return f(
         new_settings,
         get_current_user(
-            get_session_id_from_cookie(),
-            get_db_session(),
-            user_sessions_storage,
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.get("/admin/events", response_model=List[EventInfoResponse])
-async def get_admin_events():
+async def get_admin_events(
+    request: Request,   
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
     from admin.events.get import f
 
     return f(
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.post("/admin/events", response_model=EventInfoResponse)
 async def create_event(
+    request: Request,   
     event_data: EventInfoResponse,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.events.post import f
 
@@ -260,19 +353,22 @@ async def create_event(
         event_data,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.patch("/admin/events/{event_id}", response_model=EventInfoResponse)
 async def update_event(
+    request: Request,   
     event_id: int,
     event_data: EventInfoResponse,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.events.event_id.patch import f
 
@@ -281,18 +377,21 @@ async def update_event(
         event_data,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.delete("/admin/events/{event_id}")
 async def delete_event(
+    request: Request,   
     event_id: int,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.events.event_id.delete import f
 
@@ -300,18 +399,21 @@ async def delete_event(
         event_id,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.get("/admin/search", response_model=List[UserInfoResponse])
 async def search_users(
+    request: Request,   
     q: str,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.search.get import f
 
@@ -319,18 +421,23 @@ async def search_users(
         q,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
-@server.get("/admin/events/{event_id}/attendants", response_model=List[UserInfoResponse])
+@server.get(
+    "/admin/events/{event_id}/attendants", response_model=List[UserInfoResponse]
+)
 async def get_event_attendants(
+    request: Request,   
     event_id: int,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.events.event_id.attendants.get import f
 
@@ -338,19 +445,22 @@ async def get_event_attendants(
         event_id,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.patch("/admin/events/{event_id}/attendants")
 async def update_event_attendants(
+    request: Request,   
     event_id: int,
     attendant_ids: List[int],
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.events.event_id.attendants.patch import f
 
@@ -359,19 +469,22 @@ async def update_event_attendants(
         attendant_ids,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.get("/admin/report", response_class=Response)
 async def generate_report(
+    request: Request,   
     date_from: date,
     date_to: date,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.report.get import f
 
@@ -380,34 +493,41 @@ async def generate_report(
         date_to,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.get("/admin/users", response_model=List[UserInfoResponse])
-async def get_all_users():
+async def get_all_users(
+    request: Request,   
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
     from server.admin.users.get import f
 
     return f(
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.post("/admin/users", response_model=UserInfoResponse)
 async def create_user(
+    request: Request,   
     user_data: UserInfoResponse,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.users.post import f
 
@@ -415,19 +535,22 @@ async def create_user(
         user_data,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.patch("/admin/users/{user_id}", response_model=UserInfoResponse)
 async def update_user(
+    request: Request,   
     user_id: int,
     user_data: UserInfoResponse,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.users.user_id.patch import f
 
@@ -436,18 +559,21 @@ async def update_user(
         user_data,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
 
 
 @server.delete("/admin/users/{user_id}")
 async def delete_user(
+    request: Request,   
     user_id: int,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.users.user_id.delete import f
 
@@ -455,12 +581,10 @@ async def delete_user(
         user_id,
         ensure_admin(
             get_current_user(
-                get_session_id_from_cookie(),
-                get_db_session(),
-                user_sessions_storage,
+                get_session_id_from_cookie(request),
+                db,
+                session_storage,
             )
         ),
-        get_db_session(),
+        db,
     )
-
-

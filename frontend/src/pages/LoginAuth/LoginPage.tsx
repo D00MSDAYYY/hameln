@@ -18,7 +18,7 @@ export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/auth/send-code', {
+      const res = await fetch('/api/auth/send-code', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

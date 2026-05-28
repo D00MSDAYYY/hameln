@@ -236,7 +236,7 @@ nohup npm run dev -- --host > "$FRONTEND_LOG" 2>&1 &
 FRONTEND_PID=$!
 echo "  Frontend PID: $FRONTEND_PID"
 echo -n "  Waiting for frontend to be ready"
-for i in {1..15}; do
+for i in {1..5}; do
     if port_in_use $FRONTEND_PORT; then
         echo -e " ${GREEN}✓ ready${NC}"
         break

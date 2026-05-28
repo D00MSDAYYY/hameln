@@ -1,4 +1,11 @@
-def f(request, response, user_sessions_storage):
+from server.user_session_storage import UserSessionStorage
+
+
+def f(
+    request,
+    response,
+    user_sessions_storage: UserSessionStorage,
+):
     session_id = request.cookies.get("session_id")
     if session_id:
         user_sessions_storage.delete_session(session_id)

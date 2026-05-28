@@ -24,9 +24,6 @@ export interface TagInfoResponse {
   id?: number | null;
   title?: string | null;
 }
-export interface LoginRequest {
-  password: string;
-}
 export interface NotificationInfoResponse {
   id?: number | null;
   title?: string | null;
@@ -38,6 +35,13 @@ export interface SettingsResponse {
   days_to_notify?: number | null;
   do_notify?: boolean | null;
 }
+export interface SignupRequest {
+  email: string;
+  firstname: string;
+  lastname: string;
+  middlename: string;
+  company: string;
+}
 export interface UserInfoResponse {
   id?: number | null;
   nickname?: string | null;
@@ -47,7 +51,7 @@ export interface UserInfoResponse {
   lastname?: string | null;
   points?: number | null;
   company?: string | null;
-  password?: string | null;
+  email?: string;
   created_at?: string | null;
 }
 /**

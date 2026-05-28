@@ -3,11 +3,17 @@ import uuid
 from fastapi import HTTPException
 from sqlmodel import select
 from pydantic_visible_fields import visible_fields_response
+from server.user_session_storage import UserSessionStorage
 
 from models.internal import User
 
 
-def f(login_data, response, db_session, user_sessions_storage):
+def f(
+    login_data,
+    response,
+    db_session,
+    user_sessions_storage:UserSessionStorage,
+):
     user = db_session.exec(
         select(User).where(User.password == login_data.password)
     ).first()
@@ -15,7 +21,7 @@ def f(login_data, response, db_session, user_sessions_storage):
     if not user:
         raise HTTPException(status_code=401, detail="Неверный пароль")
 
-    session_id = uuid.uuid4().hex
+    session_id = user_sessions_storage.generate_uid()
 
     user_sessions_storage.save_session(session_id, user.id)  # type: ignore # <-- Redis # TODO
 

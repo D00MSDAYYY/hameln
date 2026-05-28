@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { MaxUI } from '@maxhub/max-ui';
 import Layout from './components/Layout';
-import { AuthChoicePage } from './pages/user/loginAuth/AuthChoicePage';
-import { LoginPage } from './pages/user/loginAuth/user/loginPage';
-import { RegisterPage } from './pages/user/loginAuth/RegisterPage';
+import { AuthChoicePage } from './pages/loginAuth/AuthChoicePage';
+import { LoginPage } from './pages/LoginAuth/LoginPage';
+import { SignUpPage } from './pages/LoginAuth/SignUpPage';
 import { UserInfoResponse } from './api/types';
 
 function App() {
@@ -70,7 +70,7 @@ function App() {
           />
         )}
         {authView === 'register' && (
-          <RegisterPage
+          <SignUpPage
             onBack={() => setAuthView('choice')}
             onSuccess={handleAuthSuccess}
           />

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Typography, Panel, CellList, CellSimple, Flex, Button } from '@maxhub/max-ui';
-import { SettingsPanel } from '../components/user/settingsPanel';
+import { SettingsPanel } from '../components/SettingsPanel';
 import { UserInfoResponse } from '../api/types';
 
 interface ProfilePageProps {

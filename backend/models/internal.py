@@ -1,10 +1,10 @@
 # internal
 from enum import Enum
 from datetime import datetime
-from typing import Optional, List
+from typing import List
 
 from sqlmodel import Field, Relationship, SQLModel, func
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from sqlalchemy import JSON, Column
 
 
@@ -33,12 +33,13 @@ class User(SQLModel, table=True):
     role: Role = Field(default=Role.user)
 
     firstname: str
-    middlename: str | None = Field(default=None)
+    middlename: str
     lastname: str
 
     points: int = Field(default=0)
     company: str | None = Field(default=None)
-    password: str
+
+    email: EmailStr = Field(unique=True, index=True)
 
     created_at: datetime = Field(
         sa_column_kwargs={"server_default": func.now()}, default=None
@@ -97,7 +98,9 @@ class Attendance(SQLModel, table=True):
     )
 
 
-class UserSettingsLink(SQLModel, table=True):
+class UserSettingsLink(
+    SQLModel, table=True
+):  # TODO remove this in future and use index
     user_id: int = Field(foreign_key="user.id", primary_key=True, ondelete="CASCADE")
     settings: dict = Field(
         default_factory=lambda: Settings().model_dump(mode="json"),

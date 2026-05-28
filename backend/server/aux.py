@@ -1,19 +1,20 @@
 from pydantic_visible_fields import visible_fields_response
-from fastapi import HTTPException, Cookie
+from fastapi import HTTPException, Cookie, Request
 from sqlmodel import Session, select
 
+from server.user_session_storage import UserSessionStorage
 from models.internal import *
 from models.external import *
 
 
-def get_session_id_from_cookie():
-    return Cookie(None, alias="session_id")
+def get_session_id_from_cookie(request: Request):
+    return request.cookies.get("session_id")
 
 
 def get_current_user(
     session_id,
     session,
-    user_sessions_storage,
+    user_sessions_storage: UserSessionStorage,
 ) -> User:
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")

@@ -1,0 +1,1181 @@
+INFO:     Started server process [27391]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27391]
+INFO:     Started server process [27526]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:63448 - "POST /user/signup HTTP/1.1" 200 OK
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 165, in get_events
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+INFO:     127.0.0.1:63451 - "GET /user/events HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 165, in get_events
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 165, in get_events
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+INFO:     127.0.0.1:63454 - "GET /user/events HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 165, in get_events
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 273, in get_settings
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+INFO:     127.0.0.1:63469 - "GET /user/settings HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 273, in get_settings
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 273, in get_settings
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+INFO:     127.0.0.1:63472 - "GET /user/settings HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 273, in get_settings
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 165, in get_events
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+INFO:     127.0.0.1:63508 - "GET /user/events HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 165, in get_events
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 165, in get_events
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+INFO:     127.0.0.1:63511 - "GET /user/events HTTP/1.1" 500 Internal Server Error
+ERROR:    Exception in ASGI application
+Traceback (most recent call last):
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/protocols/http/httptools_impl.py", line 421, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        self.scope, self.receive, self.send
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/uvicorn/middleware/proxy_headers.py", line 56, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/applications.py", line 1159, in __call__
+    await super().__call__(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/applications.py", line 90, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/cors.py", line 88, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/server.py", line 165, in get_events
+    get_current_user(
+    ~~~~~~~~~~~~~~~~^
+        get_session_id_from_cookie(request),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        db,
+        ^^^
+        session_storage,
+        ^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/aux.py", line 22, in get_current_user
+    user_id = user_sessions_storage.get(session_id)
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/server/user_session_storage.py", line 19, in get
+    return self._redis_db.get(session_id)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/commands/core.py", line 2073, in get
+    return self.execute_command("GET", name, keys=[name])
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 716, in execute_command
+    return self._execute_command(*args, **options)
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 736, in _execute_command
+    result = conn.retry.call_with_retry(
+        lambda: self._send_command_parse_response(
+    ...<3 lines>...
+        with_failure_count=True,
+    )
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/retry.py", line 120, in call_with_retry
+    return do()
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 737, in <lambda>
+    lambda: self._send_command_parse_response(
+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        conn, command_name, *args, **options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ),
+    ^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/client.py", line 681, in _send_command_parse_response
+    conn.send_command(*args, **options)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 1306, in send_command
+    self._command_packer.pack(*args),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/connection.py", line 159, in pack
+    for arg in map(self.encode, args):
+               ~~~^^^^^^^^^^^^^^^^^^^
+  File "/Users/killroy/Desktop/code/my_projects/hameln/backend/.venv/lib/python3.13/site-packages/redis/_parsers/encoders.py", line 29, in encode
+    raise DataError(
+    ...<2 lines>...
+    )
+redis.exceptions.DataError: Invalid input of type: 'Cookie'. Convert to a bytes, string, int or float first.
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [27526]

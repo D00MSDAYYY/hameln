@@ -6,30 +6,34 @@ usage() {
     exit 1
 }
 
-if [ $# -ne 2 ]; then
-    usage
-fi
+[ $# -ne 2 ] && usage
 
 INPUT="$1"
 OUTPUT="$2"
 
 [ -f "$INPUT" ] || { echo "Ошибка: входной файл '$INPUT' не найден." >&2; exit 1; }
 
-# Директория, где лежат external.py и internal.py
+PYTHON_BIN=$(head -1 "$(command -v pydantic2ts)" | sed 's/^#!//')
+[ -z "$PYTHON_BIN" ] && PYTHON_BIN="python3"
+
 MODELS_DIR="$(dirname "$(realpath "$INPUT")")"
-INTERNAL_FILE="$MODELS_DIR/internal.py"
+INTERNAL_FILE="$(dirname "$MODELS_DIR")/internal.py"
+
+# Корень backend — на два уровня выше models (т.е. сам backend/)
+BACKEND_DIR="$(dirname "$(dirname "$MODELS_DIR")")"
 
 EXCLUDE_ARGS=""
 if [ -f "$INTERNAL_FILE" ]; then
-    echo "Обнаружен internal.py, извлекаем модели для исключения..." >&2
+    echo "Обнаружен internal.py: $INTERNAL_FILE" >&2
 
-    INTERNAL_MODELS=$(python - "$MODELS_DIR" << 'PYEOF'
+    # PYTHONPATH позволяет резолвить ..internal при извлечении моделей
+    INTERNAL_MODELS=$(PYTHONPATH="$BACKEND_DIR" "$PYTHON_BIN" - "$MODELS_DIR" << 'PYEOF'
 import sys, json, importlib.util
 from pathlib import Path
 from pydantic import BaseModel
 
 models_dir = sys.argv[1]
-internal_path = Path(models_dir) / "internal.py"
+internal_path = Path(models_dir).parent / "internal.py"
 
 spec = importlib.util.spec_from_file_location("internal", internal_path)
 internal = importlib.util.module_from_spec(spec)
@@ -46,8 +50,7 @@ PYEOF
     )
 
     if [ $? -eq 0 ] && [ -n "$INTERNAL_MODELS" ]; then
-        # Преобразуем JSON-массив в строку с пробелами для цикла
-        MODELS_LIST=$(python -c "import sys,json; print(' '.join(json.loads('''$INTERNAL_MODELS''')))")
+        MODELS_LIST=$(echo "$INTERNAL_MODELS" | python3 -c "import sys,json; print(' '.join(json.load(sys.stdin)))")
         echo "Модели для исключения: $MODELS_LIST" >&2
         for model in $MODELS_LIST; do
             EXCLUDE_ARGS="$EXCLUDE_ARGS --exclude $model"
@@ -56,14 +59,10 @@ PYEOF
         echo "Не удалось извлечь модели из internal.py, продолжаем без исключений." >&2
     fi
 else
-    echo "internal.py не найден, исключения не требуются." >&2
+    echo "internal.py не найден, проверялся путь: $INTERNAL_FILE" >&2
 fi
 
-# Проверка наличия инструментов
-command -v pydantic2ts >/dev/null 2>&1 || {
-    echo "pydantic2ts не найден. Установите: pip install pydantic-to-typescript" >&2
-    exit 1
-}
+command -v pydantic2ts >/dev/null 2>&1 || { echo "pydantic2ts не найден." >&2; exit 1; }
 
 JSON2TS_CMD=""
 if command -v json2ts >/dev/null 2>&1; then
@@ -71,12 +70,12 @@ if command -v json2ts >/dev/null 2>&1; then
 elif command -v npx >/dev/null 2>&1; then
     JSON2TS_CMD="npx json-schema-to-typescript"
 else
-    echo "Установите json-schema-to-typescript (npm install -g ...) или npx" >&2
+    echo "Установите json-schema-to-typescript или npx" >&2
     exit 1
 fi
 
 echo "Конвертация '$INPUT' -> '$OUTPUT' ..."
-pydantic2ts \
+PYTHONPATH="$BACKEND_DIR" pydantic2ts \
     --module "$INPUT" \
     --output "$OUTPUT" \
     --json2ts-cmd "$JSON2TS_CMD" \
