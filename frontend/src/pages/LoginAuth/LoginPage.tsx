@@ -9,23 +9,23 @@ interface LoginPageProps {
 }
 
 export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
-  const [contact, setContact] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const cleanContact = contact.trim();
+  const cleanPhone = phone.trim();
   const cleanPassword = password.trim();
 
   const login = async () => {
-    if (!cleanContact || !cleanPassword) return;
+    if (!cleanPhone || !cleanPassword) return;
 
     setLoading(true);
     setError('');
 
     try {
       const user = await authApi.login({
-        contact: cleanContact,
+        phone: cleanPhone,
         password: cleanPassword,
       });
       onSuccess(user);
@@ -58,13 +58,14 @@ export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
         </Flex>
 
         <Typography.Body style={{ marginBottom: 16 }}>
-          Введите email или телефон, указанный в заявке, и пароль
+          Введите телефон, указанный в заявке, и пароль
         </Typography.Body>
         <Input
-          placeholder="Email или телефон"
-          value={contact}
+          type="tel"
+          placeholder="Телефон"
+          value={phone}
           onChange={(e) => {
-            setContact(e.target.value);
+            setPhone(e.target.value);
             setError('');
           }}
         />
@@ -84,7 +85,7 @@ export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
           stretched
           onClick={login}
           loading={loading}
-          disabled={!cleanContact || !cleanPassword}
+          disabled={!cleanPhone || !cleanPassword}
           style={{ marginTop: 16, fontWeight: 600 }}
         >
           Войти

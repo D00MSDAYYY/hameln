@@ -11,7 +11,6 @@ traceback.print_exc(file=sys.stdout)
 import redis
 
 from sqlmodel import Session, create_engine, select
-from sqlalchemy import inspect, text
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, Request, Depends
@@ -26,60 +25,29 @@ load_dotenv(".env")
 SESSION_TTL = int(os.getenv("SESSION_TTL", "86400"))
 VERIFICATION_CODE_TTL = int(os.getenv("VERIFICATION_CODE_TTL", "300"))
 BACKEND_DIR = str(os.getenv("BACKEND_DIR", "."))
-ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_PHONE = os.getenv("ADMIN_PHONE")
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 _db = create_engine(f"sqlite:///{BACKEND_DIR}/hameln.db", echo=False)
 
 
-def add_column_if_missing(table_name: str, column_name: str, ddl: str):
-    inspector = inspect(_db)
-    columns = {column["name"] for column in inspector.get_columns(table_name)}
-
-    if column_name not in columns:
-        with _db.begin() as connection:
-            connection.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {ddl}"))
-
-
-def init_legacy_schema():
-    if _db.dialect.name != "sqlite":
-        return
-
-    inspector = inspect(_db)
-    tables = set(inspector.get_table_names())
-
-    if "user" in tables:
-        add_column_if_missing("user", "phone", "phone VARCHAR")
-        add_column_if_missing("user", "password", "password VARCHAR")
-
-        with _db.begin() as connection:
-            connection.execute(
-                text("CREATE UNIQUE INDEX IF NOT EXISTS ix_user_phone ON user (phone)")
-            )
-
-    if "signuprequest" in tables:
-        add_column_if_missing("signuprequest", "phone", "phone VARCHAR")
-
-
 def init_admin_user():
-    if not ADMIN_EMAIL or not ADMIN_PASSWORD:
+    if not ADMIN_PHONE or not ADMIN_PASSWORD:
         return
 
     with Session(_db) as session:
-        admin = session.exec(select(User).where(User.email == ADMIN_EMAIL)).first()
+        admin = session.exec(select(User).where(User.phone == ADMIN_PHONE)).first()
 
         if admin:
             admin.role = Role.admin
             admin.password = ADMIN_PASSWORD
         else:
             admin = User(
-                nickname=ADMIN_EMAIL,
+                nickname=ADMIN_PHONE,
                 firstname="Admin",
-                middlename="",
                 lastname="User",
                 company=None,
-                email=ADMIN_EMAIL,
-                phone=None,
+                phone=ADMIN_PHONE,
                 password=ADMIN_PASSWORD,
                 role=Role.admin,
             )
@@ -90,7 +58,6 @@ def init_admin_user():
 
 def init_database():
     SQLModel.metadata.create_all(_db)
-    init_legacy_schema()
     init_admin_user()
 
 

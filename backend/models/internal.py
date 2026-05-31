@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List
 
 from sqlmodel import Field, Relationship, SQLModel, func
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel
 from sqlalchemy import JSON, Column
 from pydantic_visible_fields import configure_roles
 
@@ -41,13 +41,11 @@ class UserBase(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
 
     firstname: str
-    middlename: str
     lastname: str
 
     company: str | None = Field(default=None)
 
-    email: EmailStr | None = Field(default=None, unique=True, index=True)
-    phone: str | None = Field(default=None, unique=True, index=True)
+    phone: str = Field(unique=True, index=True)
 
     created_at: datetime = Field(
         sa_column_kwargs={"server_default": func.now()}, default=None

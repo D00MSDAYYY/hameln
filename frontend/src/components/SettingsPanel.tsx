@@ -15,7 +15,6 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
   // ---- личные данные (из user) ----
   const [firstname, setFirstname] = useState(user.firstname ?? '');
   const [lastname, setLastname] = useState(user.lastname ?? '');
-  const [middlename, setMiddlename] = useState(user.middlename ?? '');
   const [company, setCompany] = useState(user.company ?? '');
 
   // ---- технические настройки (из /user/settings) ----
@@ -40,7 +39,6 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
     const profileBody = {
       firstname,
       lastname,
-      middlename: middlename || null,
       company: company || null,
     };
     const settingsBody = {
@@ -124,11 +122,6 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
                     placeholder="Фамилия"
                     value={lastname}
                     onChange={(e) => setLastname(e.target.value)}
-                  />
-                  <Input
-                    placeholder="Отчество (необязательно)"
-                    value={middlename}
-                    onChange={(e) => setMiddlename(e.target.value)}
                   />
                 </Panel>
               </div>

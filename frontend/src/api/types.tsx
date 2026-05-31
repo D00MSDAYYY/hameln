@@ -25,7 +25,7 @@ export interface TagInfoResponse {
   title?: string | null;
 }
 export interface LoginRequest {
-  contact: string;
+  phone: string;
   password: string;
 }
 export interface NotificationInfoResponse {
@@ -44,20 +44,16 @@ export interface SettingsResponse {
   do_notify?: boolean | null;
 }
 export interface SignupRequest {
-  email?: string | null;
-  phone?: string | null;
+  phone: string;
   firstname: string;
   lastname: string;
-  middlename: string;
   company: string;
 }
 export interface SignupRequestInfoResponse {
   id?: number | null;
   firstname?: string | null;
-  middlename?: string | null;
   lastname?: string | null;
   company?: string | null;
-  email?: string | null;
   phone?: string | null;
   created_at?: string | null;
 }
@@ -70,11 +66,9 @@ export interface UserInfoResponse {
   role?: Role | null;
   password?: string | null;
   firstname?: string | null;
-  middlename?: string | null;
   lastname?: string | null;
   points?: number | null;
   company?: string | null;
-  email?: string | null;
   phone?: string | null;
   created_at?: string | null;
 }
@@ -82,11 +76,9 @@ export interface UserRequest {
   nickname?: string | null;
   role?: string | null;
   firstname?: string | null;
-  middlename?: string | null;
   lastname?: string | null;
   points?: number | null;
   company?: string | null;
-  email?: string | null;
   phone?: string | null;
   password?: string | null;
 }

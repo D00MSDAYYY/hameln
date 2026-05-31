@@ -6,7 +6,7 @@ from server.aux import user_to_response
 from models.internal import User, Role
 
 
-REQUIRED_STRING_FIELDS = {"nickname", "firstname", "middlename", "lastname"}
+REQUIRED_STRING_FIELDS = {"nickname", "firstname", "lastname", "phone"}
 
 
 def normalize_update_dict(update_dict):
@@ -16,7 +16,8 @@ def normalize_update_dict(update_dict):
         if field in REQUIRED_STRING_FIELDS:
             if value is None:
                 value = ""
-            if field != "middlename" and not str(value).strip():
+            value = str(value).strip()
+            if not value:
                 raise HTTPException(status_code=400, detail="Заполните обязательные поля")
 
         normalized[field] = value
@@ -42,6 +43,13 @@ def f(user_id, user_data, admin, session):
         if existing:
             raise HTTPException(
                 status_code=400, detail="Пользователь с таким никнеймом уже существует"
+            )
+
+    if "phone" in update_dict and update_dict["phone"] != user.phone:
+        existing = session.exec(select(User).where(User.phone == update_dict["phone"])).first()
+        if existing:
+            raise HTTPException(
+                status_code=400, detail="Пользователь с таким телефоном уже существует"
             )
 
     for field, value in update_dict.items():

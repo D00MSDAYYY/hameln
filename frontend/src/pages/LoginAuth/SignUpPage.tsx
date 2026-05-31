@@ -13,11 +13,9 @@ type FieldErrors = Partial<Record<keyof SignupRequest | 'form', string>>;
 const requiredMessage = 'Обязательное поле';
 
 export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
-  const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
-  const [middlename, setMiddlename] = useState('');
   const [company, setCompany] = useState('');
   const [loading, setLoading] = useState(false);
   const [submittedMessage, setSubmittedMessage] = useState('');
@@ -26,10 +24,9 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
   const validate = () => {
     const newErrors: FieldErrors = {};
 
-    if (!email.trim() && !phone.trim()) newErrors.form = 'Укажите email или телефон';
+    if (!phone.trim()) newErrors.phone = requiredMessage;
     if (!firstname.trim()) newErrors.firstname = requiredMessage;
     if (!lastname.trim()) newErrors.lastname = requiredMessage;
-    if (!middlename.trim()) newErrors.middlename = requiredMessage;
     if (!company.trim()) newErrors.company = requiredMessage;
 
     return newErrors;
@@ -37,14 +34,11 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
 
   const buildPayload = (): SignupRequest => {
     const payload: SignupRequest = {
+      phone: phone.trim(),
       firstname: firstname.trim(),
       lastname: lastname.trim(),
-      middlename: middlename.trim(),
       company: company.trim(),
     };
-
-    if (email.trim()) payload.email = email.trim();
-    if (phone.trim()) payload.phone = phone.trim();
 
     return payload;
   };
@@ -63,7 +57,7 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
     try {
       const result = await authApi.createSignupRequest(buildPayload());
       setSubmittedMessage(
-        result.message || 'Заявка отправлена. После одобрения администратором вы сможете войти по email или телефону и паролю.',
+        result.message || 'Заявка отправлена. После одобрения администратором вы сможете войти по телефону и паролю.',
       );
     } catch (err) {
       setErrors({ form: err instanceof Error ? err.message : 'Ошибка регистрации' });
@@ -145,21 +139,6 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
             <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                clearError('email');
-                if (errors.form) setErrors((prev) => ({ ...prev, form: '' }));
-              }}
-              style={getFieldStyle('email')}
-            />
-            {errors.email && <Typography.Body style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{errors.email}</Typography.Body>}
-          </div>
-
-          <div>
-            <Input
               type="tel"
               placeholder="Телефон"
               value={phone}
@@ -174,7 +153,7 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
           </div>
 
           <Typography.Body style={{ color: '#6b7280', fontSize: 12, marginTop: -8 }}>
-            Укажите email, телефон или оба контакта.
+            Вход в приложение будет по этому телефону.
           </Typography.Body>
 
           <div>
@@ -201,19 +180,6 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
               style={getFieldStyle('lastname')}
             />
             {errors.lastname && <Typography.Body style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{errors.lastname}</Typography.Body>}
-          </div>
-
-          <div>
-            <Input
-              placeholder="Отчество"
-              value={middlename}
-              onChange={(e) => {
-                setMiddlename(e.target.value);
-                clearError('middlename');
-              }}
-              style={getFieldStyle('middlename')}
-            />
-            {errors.middlename && <Typography.Body style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{errors.middlename}</Typography.Body>}
           </div>
 
           <div>

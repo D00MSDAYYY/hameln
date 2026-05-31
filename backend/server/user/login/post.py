@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlmodel import or_, select
+from sqlmodel import select
 from server.aux import user_to_response
 from server.user_session_storage import UserSessionStorage
 
@@ -12,19 +12,16 @@ def f(
     db_session,
     user_sessions_storage: UserSessionStorage,
 ):
-    contact = login_data.contact.strip()
+    phone = login_data.phone.strip()
     user = db_session.exec(
         select(User).where(
-            or_(
-                User.email == contact,
-                User.phone == contact,
-            ),
+            User.phone == phone,
             User.password == login_data.password,
         )
     ).first()
 
     if not user:
-        raise HTTPException(status_code=401, detail="Неверный контакт или пароль")
+        raise HTTPException(status_code=401, detail="Неверный телефон или пароль")
 
     session_id = user_sessions_storage.generate_uid()
 

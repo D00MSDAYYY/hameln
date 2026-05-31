@@ -25,9 +25,7 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
   const [nickname, setNickname] = useState(initial?.nickname || '');
   const [firstname, setFirstname] = useState(initial?.firstname || '');
   const [lastname, setLastname] = useState(initial?.lastname || '');
-  const [middlename, setMiddlename] = useState(initial?.middlename || '');
   const [company, setCompany] = useState(initial?.company || '');
-  const [email, setEmail] = useState(initial?.email || '');
   const [phone, setPhone] = useState(initial?.phone || '');
   const [password, setPassword] = useState(initial?.password || '');
   const [role, setRole] = useState(initial?.role || 'user');
@@ -37,9 +35,7 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
     setNickname(initial?.nickname || '');
     setFirstname(initial?.firstname || '');
     setLastname(initial?.lastname || '');
-    setMiddlename(initial?.middlename || '');
     setCompany(initial?.company || '');
-    setEmail(initial?.email || '');
     setPhone(initial?.phone || '');
     setPassword(initial?.password || '');
     setRole(initial?.role || 'user');
@@ -47,7 +43,7 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
   }, [initial]);
 
   const handleSubmit = () => {
-    if (!nickname.trim() || !firstname.trim() || !lastname.trim()) {
+    if (!nickname.trim() || !firstname.trim() || !lastname.trim() || !phone.trim()) {
       return;
     }
 
@@ -55,9 +51,7 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
       nickname: nickname.trim(),
       firstname: firstname.trim(),
       lastname: lastname.trim(),
-      middlename: middlename.trim(),
       company: company.trim() || null,
-      email: email.trim() || null,
       phone: phone.trim() || null,
       role,
       points: parseInt(points, 10) || 0,
@@ -106,35 +100,12 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
       </div>
 
       <div>
-        <Typography.Title variant="small-strong">Отчество (необязательно)</Typography.Title>
-        <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input
-            placeholder="Введите отчество"
-            value={middlename}
-            onChange={(e) => setMiddlename(e.target.value)}
-          />
-        </Panel>
-      </div>
-
-      <div>
         <Typography.Title variant="small-strong">Компания</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
           <Input
             placeholder="Введите компанию"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
-          />
-        </Panel>
-      </div>
-
-      <div>
-        <Typography.Title variant="small-strong">Email</Typography.Title>
-        <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input
-            type="email"
-            placeholder="Введите email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
           />
         </Panel>
       </div>

@@ -13,14 +13,12 @@ class UserInfoResponse(VisibleFieldsModel):
     role: Role | None = field(visible_to=[Role.admin], default=None)
     password: str | None = field(visible_to=[Role.admin], default=None)
 
-    firstname: str | None = field(visible_to=[Role.admin], default=None)
-    middlename: str | None = field(visible_to=[Role.admin], default=None)
-    lastname: str | None = field(visible_to=[Role.admin], default=None)
+    firstname: str | None = field(visible_to=[Role.user], default=None)
+    lastname: str | None = field(visible_to=[Role.user], default=None)
 
     points: int | None = field(visible_to=[Role.observer], default=None)
     company: str | None = field(visible_to=[Role.user], default=None)
 
-    email: str | None = field(visible_to=[Role.user], default=None)
     phone: str | None = field(visible_to=[Role.user], default=None)
 
     created_at: datetime | None = field(visible_to=[Role.admin], default=None)
@@ -71,11 +69,9 @@ class SignupRequestInfoResponse(VisibleFieldsModel):
     id: int | None = field(visible_to=[Role.admin], default=None)
 
     firstname: str | None = field(visible_to=[Role.admin], default=None)
-    middlename: str | None = field(visible_to=[Role.admin], default=None)
     lastname: str | None = field(visible_to=[Role.admin], default=None)
     company: str | None = field(visible_to=[Role.admin], default=None)
 
-    email: str | None = field(visible_to=[Role.admin], default=None)
     phone: str | None = field(visible_to=[Role.admin], default=None)
 
     created_at: datetime | None = field(visible_to=[Role.admin], default=None)

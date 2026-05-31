@@ -6,7 +6,7 @@ from server.aux import user_to_response
 from models.internal import Role, User
 
 
-REQUIRED_STRING_FIELDS = {"nickname", "firstname", "middlename", "lastname", "password"}
+REQUIRED_STRING_FIELDS = {"nickname", "firstname", "lastname", "phone", "password"}
 
 
 def normalize_create_dict(user_data):
@@ -20,9 +20,11 @@ def normalize_create_dict(user_data):
 
         if value is None:
             value = ""
-            data[field] = value
 
-        if field != "middlename" and not str(value).strip():
+        value = str(value).strip()
+        data[field] = value
+
+        if not value:
             raise HTTPException(status_code=400, detail="Заполните обязательные поля")
 
     return data
@@ -38,6 +40,12 @@ def f(user_data, admin, session):
         )
 
     create_dict = normalize_create_dict(user_data)
+
+    existing_phone = session.exec(select(User).where(User.phone == create_dict["phone"])).first()
+    if existing_phone:
+        raise HTTPException(
+            status_code=400, detail="Пользователь с таким телефоном уже существует"
+        )
 
     new_user = User(
         **create_dict,

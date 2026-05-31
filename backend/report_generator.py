@@ -64,7 +64,7 @@ def generate_excel_report(
     ws_users = wb.active
     ws_users.title = "Пользователи"
     headers = [
-        "ID", "Никнейм", "Имя", "Фамилия", "Отчество",
+        "ID", "Никнейм", "Имя", "Фамилия", "Телефон",
         "Роль", "Баллы", "Компания", "Создан",
     ]
     style_header(ws_users, headers)
@@ -79,7 +79,7 @@ def generate_excel_report(
         ws_users.cell(row=row_num, column=2, value=user.nickname)
         ws_users.cell(row=row_num, column=3, value=user.firstname)
         ws_users.cell(row=row_num, column=4, value=user.lastname)
-        ws_users.cell(row=row_num, column=5, value=user.middlename)
+        ws_users.cell(row=row_num, column=5, value=user.phone)
         ws_users.cell(row=row_num, column=6, value=user.role.value)
         ws_users.cell(row=row_num, column=7, value=user.points)
         ws_users.cell(row=row_num, column=8, value=user.company)

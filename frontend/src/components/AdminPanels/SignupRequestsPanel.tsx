@@ -23,42 +23,34 @@ interface SignupRequestFormProps {
 }
 
 const buildPayload = ({
-  email,
   phone,
   firstname,
   lastname,
-  middlename,
   company,
 }: SignupRequestInfoResponse): SignupRequest => ({
-  email: email?.trim() || null,
-  phone: phone?.trim() || null,
+  phone: phone?.trim() || '',
   firstname: firstname?.trim() || '',
   lastname: lastname?.trim() || '',
-  middlename: middlename?.trim() || '',
   company: company?.trim() || '',
 });
 
 const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps) => {
-  const [email, setEmail] = useState(initial.email || '');
   const [phone, setPhone] = useState(initial.phone || '');
   const [firstname, setFirstname] = useState(initial.firstname || '');
   const [lastname, setLastname] = useState(initial.lastname || '');
-  const [middlename, setMiddlename] = useState(initial.middlename || '');
   const [company, setCompany] = useState(initial.company || '');
   const [error, setError] = useState('');
 
   const handleSubmit = () => {
     const payload = buildPayload({
-      email,
       phone,
       firstname,
       lastname,
-      middlename,
       company,
     });
 
-    if (!payload.email && !payload.phone) {
-      setError('Укажите email или телефон');
+    if (!payload.phone) {
+      setError('Укажите телефон');
       return;
     }
 
@@ -73,18 +65,6 @@ const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div>
-        <Typography.Title variant="small-strong">Email</Typography.Title>
-        <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input
-            type="email"
-            placeholder="Введите email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </Panel>
-      </div>
-
       <div>
         <Typography.Title variant="small-strong">Телефон</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
@@ -115,17 +95,6 @@ const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps
             placeholder="Введите фамилию"
             value={lastname}
             onChange={(e) => setLastname(e.target.value)}
-          />
-        </Panel>
-      </div>
-
-      <div>
-        <Typography.Title variant="small-strong">Отчество</Typography.Title>
-        <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input
-            placeholder="Введите отчество"
-            value={middlename}
-            onChange={(e) => setMiddlename(e.target.value)}
           />
         </Panel>
       </div>
@@ -315,7 +284,7 @@ const SignupRequestsPanel = ({ onBack }: SignupRequestsPanelProps) => {
           ) : (
             requests.map((request) => {
               const title = `${request.firstname || ''} ${request.lastname || ''}`.trim() || 'Без имени';
-              const contact = [request.email, request.phone].filter(Boolean).join(' · ');
+              const contact = request.phone || '';
 
               return (
                 <Panel

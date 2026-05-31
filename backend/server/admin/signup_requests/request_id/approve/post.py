@@ -14,29 +14,13 @@ def f(
     if not signup_req:
         raise HTTPException(status_code=404, detail="Заявка не найдена")
 
-    existing_by_email = None
-    if signup_req.email:
-        existing_by_email = db.exec(
-            select(User).where(User.email == signup_req.email)
-        ).first()
-
-    if existing_by_email:
-        raise HTTPException(
-            status_code=400, detail="Пользователь с таким email уже существует"
-        )
-
-    existing_by_phone = None
-    if signup_req.phone:
-        existing_by_phone = db.exec(
-            select(User).where(User.phone == signup_req.phone)
-        ).first()
-
-    if existing_by_phone:
+    existing_user = db.exec(select(User).where(User.phone == signup_req.phone)).first()
+    if existing_user:
         raise HTTPException(
             status_code=400, detail="Пользователь с таким телефоном уже существует"
         )
 
-    nickname = signup_req.email or signup_req.phone
+    nickname = signup_req.phone
     password = secrets.token_urlsafe(9)
 
     new_user = User(
