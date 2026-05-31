@@ -63,3 +63,7 @@ class NotificationInfoResponse(VisibleFieldsModel):
     body: str | None = field(visible_to=[Role.user], default=None)
 
     created_at: datetime | None = field(visible_to=[Role.admin], default=None)
+
+
+class SignupResponse(VisibleFieldsModel):
+    message: str = field(visible_to=[Role.observer])

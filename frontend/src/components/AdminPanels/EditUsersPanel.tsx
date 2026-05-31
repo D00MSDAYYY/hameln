@@ -8,6 +8,7 @@ import {
 } from '@maxhub/max-ui';
 import UserFormPanel from './UserFormPanel';
 import type { UserInfoResponse } from '../../api/types';
+import { adminApi } from '../../api/admin';
 
 
 
@@ -22,10 +23,7 @@ const EditUsersPanel = ({ onBack }: { onBack: () => void }) => {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const res = await fetch('/api/admin/users', { credentials: 'include' });
-            if (!res.ok) throw new Error('Ошибка загрузки');
-            const data: UserInfoResponse[] = await res.json();
-            setUsers(data);
+            setUsers(await adminApi.getUsers());
         } catch (err) {
             console.error(err);
         } finally {
@@ -45,16 +43,7 @@ const EditUsersPanel = ({ onBack }: { onBack: () => void }) => {
     const handleCreate = async (body: Record<string, any>) => {
         try {
             setError(null);
-            const res = await fetch('/api/admin/users', {
-                method: 'POST',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.detail || `Ошибка ${res.status}`);
-            }
+            await adminApi.createUser(body);
             await fetchUsers();
             resetState();
         } catch (err: any) {
@@ -66,16 +55,7 @@ const EditUsersPanel = ({ onBack }: { onBack: () => void }) => {
         if (!editingUser) return;
         try {
             setError(null);
-            const res = await fetch(`/api/admin/users/${editingUser.id}`, {
-                method: 'PATCH',
-                credentials: 'include',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.detail || 'Ошибка обновления');
-            }
+            await adminApi.updateUser(editingUser.id!, body);
             await fetchUsers();
             resetState();
         } catch (err: any) {
@@ -91,14 +71,7 @@ const EditUsersPanel = ({ onBack }: { onBack: () => void }) => {
 
         try {
             setError(null);
-            const res = await fetch(`/api/admin/users/${userId}`, {
-                method: 'DELETE',
-                credentials: 'include',
-            });
-            if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.detail || 'Ошибка удаления');
-            }
+            await adminApi.deleteUser(userId);
             await fetchUsers();
         } catch (err: any) {
             setError(err.message || 'Не удалось удалить пользователя');

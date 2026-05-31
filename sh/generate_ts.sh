@@ -13,14 +13,16 @@ OUTPUT="$2"
 
 [ -f "$INPUT" ] || { echo "Ошибка: входной файл '$INPUT' не найден." >&2; exit 1; }
 
+command -v pydantic2ts >/dev/null 2>&1 || { echo "pydantic2ts не найден." >&2; exit 1; }
+
 PYTHON_BIN=$(head -1 "$(command -v pydantic2ts)" | sed 's/^#!//')
 [ -z "$PYTHON_BIN" ] && PYTHON_BIN="python3"
 
 MODELS_DIR="$(dirname "$(realpath "$INPUT")")"
-INTERNAL_FILE="$(dirname "$MODELS_DIR")/internal.py"
+INTERNAL_FILE="$MODELS_DIR/internal.py"
 
-# Корень backend — на два уровня выше models (т.е. сам backend/)
-BACKEND_DIR="$(dirname "$(dirname "$MODELS_DIR")")"
+# Корень backend — на уровень выше models
+BACKEND_DIR="$(dirname "$MODELS_DIR")"
 
 EXCLUDE_ARGS=""
 if [ -f "$INTERNAL_FILE" ]; then
@@ -33,7 +35,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 models_dir = sys.argv[1]
-internal_path = Path(models_dir).parent / "internal.py"
+internal_path = Path(models_dir) / "internal.py"
 
 spec = importlib.util.spec_from_file_location("internal", internal_path)
 internal = importlib.util.module_from_spec(spec)
@@ -61,8 +63,6 @@ PYEOF
 else
     echo "internal.py не найден, проверялся путь: $INTERNAL_FILE" >&2
 fi
-
-command -v pydantic2ts >/dev/null 2>&1 || { echo "pydantic2ts не найден." >&2; exit 1; }
 
 JSON2TS_CMD=""
 if command -v json2ts >/dev/null 2>&1; then

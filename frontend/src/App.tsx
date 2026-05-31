@@ -1,26 +1,21 @@
 import { useState, useEffect } from 'react';
 import { MaxUI } from '@maxhub/max-ui';
 import Layout from './components/Layout';
-import { AuthChoicePage } from './pages/loginAuth/AuthChoicePage';
+import { AuthChoicePage } from './pages/LoginAuth/AuthChoicePage';
 import { LoginPage } from './pages/LoginAuth/LoginPage';
 import { SignUpPage } from './pages/LoginAuth/SignUpPage';
-import { UserInfoResponse } from './api/types';
+import { authApi } from './api/auth';
+import type { UserInfoResponse } from './api/types';
 
 function App() {
   const [user, setUser] = useState<UserInfoResponse | null>(null);
   const [checking, setChecking] = useState(true);
-  const [authView, setAuthView] = useState<'choice' | 'login' | 'register'>('choice');
+  const [authView, setAuthView] = useState<'choice' | 'login' | 'signup'>('choice');
 
-  // Функция проверки сессии
   const checkSession = async () => {
     try {
-      const res = await fetch('/user/profile', { credentials: 'include' });
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data);
-      } else {
-        setUser(null);
-      }
+      const data = await authApi.getProfile();
+      setUser(data);
     } catch {
       setUser(null);
     } finally {
@@ -28,20 +23,18 @@ function App() {
     }
   };
 
-  // Проверяем сессию при загрузке и при фокусе окна
   useEffect(() => {
     checkSession();
     window.addEventListener('focus', checkSession);
     return () => window.removeEventListener('focus', checkSession);
   }, []);
 
-  // После успешного входа/регистрации просто перезапрашиваем сессию (или сохраняем user)
-  const handleAuthSuccess = (userData?: UserInfoResponse) => {
-    if (userData) {
-      setUser(userData);
-    } else {
-      checkSession();  // если данные не передали, перепроверим сессию
-    }
+  const handleLoginSuccess = (userData: UserInfoResponse) => {
+    setUser(userData);
+  };
+
+  const handleSignupSubmitted = () => {
+    setAuthView('login');
   };
 
   if (checking) {
@@ -60,19 +53,19 @@ function App() {
         {authView === 'choice' && (
           <AuthChoicePage
             onLogin={() => setAuthView('login')}
-            onRegister={() => setAuthView('register')}
+            onSignUp={() => setAuthView('signup')}
           />
         )}
         {authView === 'login' && (
           <LoginPage
             onBack={() => setAuthView('choice')}
-            onSuccess={handleAuthSuccess}
+            onSuccess={handleLoginSuccess}
           />
         )}
-        {authView === 'register' && (
+        {authView === 'signup' && (
           <SignUpPage
             onBack={() => setAuthView('choice')}
-            onSuccess={handleAuthSuccess}
+            onSubmitted={handleSignupSubmitted}
           />
         )}
       </MaxUI>

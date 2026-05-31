@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Typography, Panel, Switch, Input, IconButton, Flex, Button } from '@maxhub/max-ui';
 import type { UserInfoResponse } from '../api/types';
+import { userApi } from '../api/user';
 
 interface SettingsPanelProps {
   onBack: () => void;
@@ -25,9 +26,9 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
 
   // Загружаем настройки при монтировании
   useEffect(() => {
-    fetch('/api/user/settings', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => {
+    userApi
+      .getSettings()
+      .then((data) => {
         setAppTheme(data.app_theme ?? 'light');
         setDoNotify(data.do_notify ?? true);
         setDaysToNotify(String(data.days_to_notify ?? 3));
@@ -49,38 +50,15 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
     };
 
     try {
-      const [profileRes, settingsRes] = await Promise.all([
-        fetch('api/user/profile', {
-          method: 'PATCH',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(profileBody),
-        }),
-        fetch('/api/user/settings', {
-          method: 'PATCH',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(settingsBody),
-        }),
+      const [updatedUser, updatedSettings] = await Promise.all([
+        userApi.updateProfile(profileBody),
+        userApi.updateSettings(settingsBody),
       ]);
 
-      if (!profileRes.ok) {
-        const err = await profileRes.json();
-        console.error('Ошибка сохранения профиля:', err.detail);
-        return;
-      }
-      if (!settingsRes.ok) {
-        const err = await settingsRes.json();
-        console.error('Ошибка сохранения настроек:', err.detail);
-        return;
-      }
-
       // Обновляем профиль пользователя в родителе
-      const updatedUser: UserInfoResponse = await profileRes.json();
       Object.assign(user, updatedUser);
 
       // Подхватываем обновлённые настройки с сервера (чтобы учесть валидацию)
-      const updatedSettings = await settingsRes.json();
       setAppTheme(updatedSettings.app_theme);
       setDoNotify(updatedSettings.do_notify);
       setDaysToNotify(String(updatedSettings.days_to_notify));

@@ -1,5 +1,3 @@
-import uuid
-
 from fastapi import HTTPException
 from sqlmodel import select
 from pydantic_visible_fields import visible_fields_response

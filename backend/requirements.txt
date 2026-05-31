@@ -8,3 +8,4 @@ python-multipart>=0.0.5
 passlib
 redis
 pydantic[email]
+pydantic-to-typescript

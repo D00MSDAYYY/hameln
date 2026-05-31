@@ -26,17 +26,13 @@ class Settings(BaseModel):
     do_notify: bool = Field(default=True)
 
 
-class User(SQLModel, table=True):
+class UserBase(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
-
-    nickname: str
-    role: Role = Field(default=Role.user)
 
     firstname: str
     middlename: str
     lastname: str
 
-    points: int = Field(default=0)
     company: str | None = Field(default=None)
 
     email: EmailStr = Field(unique=True, index=True)
@@ -44,6 +40,16 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(
         sa_column_kwargs={"server_default": func.now()}, default=None
     )
+
+
+class User(UserBase, table=True):
+    role: Role = Field(default=Role.user)
+    nickname: str
+    points: int = Field(default=0)
+
+
+class SignUpRequest(UserBase, table=True):
+    pass
 
 
 class Notification(SQLModel, table=True):

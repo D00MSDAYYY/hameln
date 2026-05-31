@@ -24,11 +24,18 @@ export interface TagInfoResponse {
   id?: number | null;
   title?: string | null;
 }
+export interface LoginCodeRequest {
+  email: string;
+}
 export interface NotificationInfoResponse {
   id?: number | null;
   title?: string | null;
   body?: string | null;
   created_at?: string | null;
+}
+export interface ReportRequest {
+  date_from: string;
+  date_to: string;
 }
 export interface SettingsResponse {
   app_theme?: AppTheme | null;
@@ -42,6 +49,9 @@ export interface SignupRequest {
   middlename: string;
   company: string;
 }
+export interface SignupResponse {
+  message: string;
+}
 export interface UserInfoResponse {
   id?: number | null;
   nickname?: string | null;
@@ -53,6 +63,10 @@ export interface UserInfoResponse {
   company?: string | null;
   email?: string;
   created_at?: string | null;
+}
+export interface VerifyCodeRequest {
+  email: string;
+  code: string;
 }
 /**
  * Base class for Pydantic models supporting role-based field visibility.

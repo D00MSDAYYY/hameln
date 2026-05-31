@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Typography, Panel, CellList, CellSimple, Flex, Button } from '@maxhub/max-ui';
 import { SettingsPanel } from '../components/SettingsPanel';
 import { UserInfoResponse } from '../api/types';
+import { userApi } from '../api/user';
 
 interface ProfilePageProps {
   user: UserInfoResponse;
@@ -12,20 +13,13 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
   const [currentView, setCurrentView] = useState<'main' | 'settings'>('main');
 
   const handleLogout = async () => {
-    console.log('Нажата кнопка Выйти'); // <-- добавьте это для проверки в консоли
     try {
-      const res = await fetch('api/user/logout', { method: 'POST', credentials: 'include' });
-      console.log('Ответ сервера:', res.status); // посмотрим статус
-      if (!res.ok) {
-        console.error('Сервер вернул ошибку', res.status);
-      }
+      await userApi.logout();
     } catch (err) {
-      console.error('Ошибка fetch:', err);
+      console.error('Ошибка выхода:', err);
     }
 
-    // Гарантированно удаляем куку на клиенте
     document.cookie = 'session_id=; Max-Age=0; path=/';
-    console.log('Кука удалена, перезагружаем...');
     window.location.reload();
   };
 

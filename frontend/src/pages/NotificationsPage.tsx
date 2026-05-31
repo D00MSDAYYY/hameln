@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Panel, Typography } from '@maxhub/max-ui';
-import type { NotificationItem } from '../api/types';
+import type { NotificationInfoResponse } from '../api/types';
+import { userApi } from '../api/user';
 
 
 const NotificationsPage = () => {
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [notifications, setNotifications] = useState<NotificationInfoResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -12,10 +13,7 @@ const NotificationsPage = () => {
     const fetchNotifications = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/user/notifications', { credentials: 'include' });
-        if (!res.ok) throw new Error('Ошибка загрузки уведомлений');
-        const data: NotificationItem[] = await res.json();
-        setNotifications(data);
+        setNotifications(await userApi.getNotifications());
       } catch (err: any) {
         setError(err.message || 'Неизвестная ошибка');
       } finally {

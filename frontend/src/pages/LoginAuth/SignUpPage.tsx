@@ -1,32 +1,50 @@
 import { useState } from 'react';
 import { Panel, Typography, Flex, Button, Input, IconButton } from '@maxhub/max-ui';
+import { authApi } from '../../api/auth';
+import type { SignupRequest } from '../../api/types';
 
 interface RegisterPageProps {
   onBack: () => void;
-  onSuccess: (user: any) => void;
+  onSubmitted: () => void;
 }
 
-export const SignUpPage = ({ onBack, onSuccess }: RegisterPageProps) => {
+type FieldErrors = Partial<Record<keyof SignupRequest | 'form', string>>;
+
+const requiredMessage = 'Обязательное поле';
+
+export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
   const [email, setEmail] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
   const [middlename, setMiddlename] = useState('');
   const [company, setCompany] = useState('');
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submittedMessage, setSubmittedMessage] = useState('');
+  const [errors, setErrors] = useState<FieldErrors>({});
 
   const validate = () => {
-    const newErrors: Record<string, string> = {};
-    if (!email.trim()) newErrors.email = 'Обязательное поле';
-    if (!firstname.trim()) newErrors.firstname = 'Обязательное поле';
-    if (!lastname.trim()) newErrors.lastname = 'Обязательное поле';
-    if (!middlename.trim()) newErrors.middlename = 'Обязательное поле';
-    if (!company.trim()) newErrors.company = 'Обязательное поле';
+    const newErrors: FieldErrors = {};
+
+    if (!email.trim()) newErrors.email = requiredMessage;
+    if (!firstname.trim()) newErrors.firstname = requiredMessage;
+    if (!lastname.trim()) newErrors.lastname = requiredMessage;
+    if (!middlename.trim()) newErrors.middlename = requiredMessage;
+    if (!company.trim()) newErrors.company = requiredMessage;
+
     return newErrors;
   };
 
+  const buildPayload = (): SignupRequest => ({
+    email: email.trim(),
+    firstname: firstname.trim(),
+    lastname: lastname.trim(),
+    middlename: middlename.trim(),
+    company: company.trim(),
+  });
+
   const handleRegister = async () => {
     const validationErrors = validate();
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -34,28 +52,67 @@ export const SignUpPage = ({ onBack, onSuccess }: RegisterPageProps) => {
 
     setLoading(true);
     setErrors({});
+
     try {
-      const res = await fetch('/api/user/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, firstname, lastname, middlename, company }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || 'Ошибка регистрации');
-      }
-      const user = await res.json();
-      onSuccess(user);
-    } catch (err: any) {
-      setErrors({ form: err.message });
+      const result = await authApi.createSignupRequest(buildPayload());
+      setSubmittedMessage(
+        result.message || 'Заявка отправлена. После одобрения администратором вы сможете войти по коду из письма.',
+      );
+    } catch (err) {
+      setErrors({ form: err instanceof Error ? err.message : 'Ошибка регистрации' });
     } finally {
       setLoading(false);
     }
   };
 
-  const getFieldStyle = (field: string) => ({
+  const clearError = (field: keyof SignupRequest) => {
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const getFieldStyle = (field: keyof SignupRequest) => ({
     borderColor: errors[field] ? '#d32f2f' : undefined,
   });
+
+  if (submittedMessage) {
+    return (
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <Panel
+          mode="primary"
+          style={{
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            padding: 20,
+            borderRadius: 16,
+            overflow: 'hidden',
+          }}
+        >
+          <Flex justify="space-between" align="center" style={{ marginBottom: 20 }}>
+            <IconButton mode="tertiary" onClick={onBack}>
+              <span style={{ fontSize: 20 }}>←</span>
+            </IconButton>
+            <Typography.Title variant="medium-strong">Заявка отправлена</Typography.Title>
+            <div style={{ width: 48 }} />
+          </Flex>
+
+          <Typography.Body style={{ marginBottom: 16 }}>
+            {submittedMessage}
+          </Typography.Body>
+
+          <Button
+            mode="primary"
+            stretched
+            onClick={onSubmitted}
+            style={{ fontWeight: 600, marginTop: 8 }}
+          >
+            Перейти ко входу
+          </Button>
+        </Panel>
+      </div>
+    );
+  }
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -86,7 +143,7 @@ export const SignUpPage = ({ onBack, onSuccess }: RegisterPageProps) => {
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                if (errors.email) setErrors((prev) => ({ ...prev, email: '' }));
+                clearError('email');
               }}
               style={getFieldStyle('email')}
             />
@@ -99,7 +156,7 @@ export const SignUpPage = ({ onBack, onSuccess }: RegisterPageProps) => {
               value={firstname}
               onChange={(e) => {
                 setFirstname(e.target.value);
-                if (errors.firstname) setErrors((prev) => ({ ...prev, firstname: '' }));
+                clearError('firstname');
               }}
               style={getFieldStyle('firstname')}
             />
@@ -112,7 +169,7 @@ export const SignUpPage = ({ onBack, onSuccess }: RegisterPageProps) => {
               value={lastname}
               onChange={(e) => {
                 setLastname(e.target.value);
-                if (errors.lastname) setErrors((prev) => ({ ...prev, lastname: '' }));
+                clearError('lastname');
               }}
               style={getFieldStyle('lastname')}
             />
@@ -125,7 +182,7 @@ export const SignUpPage = ({ onBack, onSuccess }: RegisterPageProps) => {
               value={middlename}
               onChange={(e) => {
                 setMiddlename(e.target.value);
-                if (errors.middlename) setErrors((prev) => ({ ...prev, middlename: '' }));
+                clearError('middlename');
               }}
               style={getFieldStyle('middlename')}
             />
@@ -138,7 +195,7 @@ export const SignUpPage = ({ onBack, onSuccess }: RegisterPageProps) => {
               value={company}
               onChange={(e) => {
                 setCompany(e.target.value);
-                if (errors.company) setErrors((prev) => ({ ...prev, company: '' }));
+                clearError('company');
               }}
               style={getFieldStyle('company')}
             />

@@ -8,6 +8,7 @@ import {
   Spinner,
 } from '@maxhub/max-ui';
 import type { UserInfoResponse } from '../../api/types';
+import { adminApi } from '../../api/admin';
 
 interface AttendantsEditorProps {
   value: UserInfoResponse[];
@@ -28,15 +29,7 @@ export const AttendantsEditor = ({ value, onChange, disabled }: AttendantsEditor
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/search?q=${encodeURIComponent(q)}`, {
-        credentials: 'include',
-      });
-      if (res.ok) {
-        const data: UserInfoResponse[] = await res.json();
-        setResults(data);
-      } else {
-        setResults([]);
-      }
+      setResults(await adminApi.searchUsers(q));
     } catch {
       setResults([]);
     } finally {

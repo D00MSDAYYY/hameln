@@ -10,7 +10,7 @@ NC='\033[0m'
 FORCE=false
 for arg in "$@"; do
     case $arg in
-        --force)
+        (--force)
             FORCE=true
             shift
             ;;
@@ -36,8 +36,45 @@ echo -e "${GREEN}   (Redis + Backend + Frontend)${NC}"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 
-# ---------- Check prerequisites ----------
-echo -e "${YELLOW}[1/6] Checking environment...${NC}"
+# ---------- Function: test if a given python has working sqlite3 ----------
+python_sqlite_works() {
+    local python_bin="$1"
+    "$python_bin" -c "import sqlite3; sqlite3.connect(':memory:')" 2>/dev/null
+}
+
+# ---------- CHECK & FIX BROKEN CONDA / SQLITE ----------
+echo -e "${YELLOW}[1/8] Checking for Conda Python / SQLite issues...${NC}"
+
+# If Conda is active and its python's sqlite3 is broken, deactivate it
+if [[ -n "${CONDA_PREFIX:-}" ]] && ! python_sqlite_works "${CONDA_PREFIX}/bin/python"; then
+    echo -e "  ${YELLOW}Conda Python has a broken sqlite3 module (likely due to xz backdoor).${NC}"
+    echo -e "  ${YELLOW}Deactivating Conda and falling back to system Python...${NC}"
+    
+    # Try to deactivate conda completely
+    conda deactivate 2>/dev/null || true
+    unset CONDA_PREFIX
+    # Refresh PATH to remove conda's bin directory
+    export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "conda" | tr '\n' ':')
+    
+    echo -e "  ${GREEN}Conda deactivated. Now using: $(which python3)${NC}"
+elif [[ -n "${CONDA_PREFIX:-}" ]]; then
+    echo -e "  ${GREEN}Conda is active and sqlite3 works (good). Keeping Conda.${NC}"
+else
+    echo -e "  ${GREEN}No active Conda environment. Using: $(which python3)${NC}"
+fi
+
+# Determine which python3 to use for venv creation
+SYSTEM_PYTHON=$(which python3)
+if ! python_sqlite_works "$SYSTEM_PYTHON"; then
+    echo -e "${RED}Error: The system Python ($SYSTEM_PYTHON) also has a broken sqlite3 module.${NC}"
+    echo -e "Please fix your Python installation or reinstall Miniconda as described earlier."
+    exit 1
+fi
+echo -e "  Using Python for venv: $SYSTEM_PYTHON ($($SYSTEM_PYTHON --version))"
+echo ""
+
+# ---------- Check prerequisites (node, npm, etc.) ----------
+echo -e "${YELLOW}[2/8] Checking environment...${NC}"
 if ! command -v python3 &>/dev/null; then
     echo -e "${RED}Error: python3 not found. Please install Python 3.${NC}"
     exit 1
@@ -50,12 +87,11 @@ if ! command -v npm &>/dev/null; then
     echo -e "${RED}Error: npm not found. Please install npm.${NC}"
     exit 1
 fi
-echo -e "  python3:  $(python3 --version 2>&1)"
 echo -e "  node:     $(node -v 2>&1)"
 echo -e "  npm:      $(npm -v 2>&1)"
 echo ""
 
-# Function to check if a port is in use
+# ---------- Port check function ----------
 port_in_use() {
     local port=$1
     if command -v lsof &>/dev/null; then
@@ -65,13 +101,11 @@ port_in_use() {
     elif command -v netstat &>/dev/null; then
         netstat -tuln | grep -q ":$port "
     else
-        # Fallback: try to connect via bash tcp redirection
         (echo > /dev/tcp/localhost/$port) &>/dev/null
         return $?
     fi
 }
 
-# Function to get the PID of a process listening on a port
 get_pid_by_port() {
     local port=$1
     if command -v lsof &>/dev/null; then
@@ -84,7 +118,7 @@ get_pid_by_port() {
 }
 
 # ---------- Redis Setup & Flush ----------
-echo -e "${YELLOW}[2/6] Checking & Flushing Redis...${NC}"
+echo -e "${YELLOW}[3/8] Checking & Flushing Redis...${NC}"
 if ! command -v redis-server &>/dev/null; then
     echo -e "${RED}Error: redis-server is not installed.${NC}"
     echo -e "Please install it:"
@@ -97,27 +131,24 @@ fi
 if redis-cli ping &>/dev/null; then
     echo -e "  ${GREEN}Redis is running on port $REDIS_PORT.${NC}"
     echo -n "  Flushing all Redis data (sessions)... "
-    if redis-cli ping > /dev/null 2>&1; then
+    if redis-cli flushdb > /dev/null 2>&1; then
         echo -e "${GREEN}OK${NC}"
     else
         echo -e "${RED}Failed (might require password or different config)${NC}"
     fi
 else
     echo -e "  Redis is not running. Attempting to start..."
-    # Try standard start methods
     if command -v brew &>/dev/null && brew services list | grep -q redis; then
         brew services start redis
     elif command -v systemctl &>/dev/null; then
         sudo systemctl start redis-server || sudo systemctl start redis
     elif command -v redis-server &>/dev/null; then
-        # Start in background if no service manager found
         redis-server --daemonize yes
     else
         echo -e "${RED}Could not start Redis automatically.${NC}"
         exit 1
     fi
     
-    # Wait for Redis to start
     echo -n "  Waiting for Redis to accept connections"
     for i in {1..10}; do
         if port_in_use $REDIS_PORT; then
@@ -133,18 +164,41 @@ else
         exit 1
     fi
     
-    # Flush after start just in case
-    redis-cli FLUSHDB > /dev/null 2>&1 || true
+    redis-cli flushdb > /dev/null 2>&1 || true
 fi
 echo ""
 
 # ---------- Backend setup ----------
-echo -e "${YELLOW}[3/6] Setting up backend...${NC}"
+echo -e "${YELLOW}[4/8] Setting up backend...${NC}"
 cd "$BACKEND_DIR"
-if [ ! -d ".venv" ]; then
-    echo "  Creating Python virtual environment .venv..."
-    python3 -m venv .venv
+
+# Check if .venv exists and if its Python is working
+VENV_PYTHON="$BACKEND_DIR/.venv/bin/python"
+NEED_RECREATE=false
+
+if [ -d ".venv" ]; then
+    if [ -f "$VENV_PYTHON" ]; then
+        if ! python_sqlite_works "$VENV_PYTHON"; then
+            echo -e "  ${YELLOW}Existing .venv has a broken Python (sqlite3 issue). Recreating...${NC}"
+            NEED_RECREATE=true
+        else
+            echo -e "  ${GREEN}Existing .venv looks healthy.${NC}"
+        fi
+    else
+        echo -e "  ${YELLOW}Existing .venv is missing Python binary. Recreating...${NC}"
+        NEED_RECREATE=true
+    fi
 fi
+
+if [ ! -d ".venv" ] || [ "$NEED_RECREATE" = true ]; then
+    if [ -d ".venv" ]; then
+        rm -rf .venv
+    fi
+    echo "  Creating Python virtual environment .venv using $SYSTEM_PYTHON..."
+    "$SYSTEM_PYTHON" -m venv .venv
+fi
+
+# Activate venv
 source .venv/bin/activate
 
 echo "  Installing Python dependencies..."
@@ -157,7 +211,7 @@ fi
 echo ""
 
 # ---------- Frontend setup ----------
-echo -e "${YELLOW}[4/6] Setting up frontend...${NC}"
+echo -e "${YELLOW}[5/8] Setting up frontend...${NC}"
 cd "$FRONTEND_DIR"
 if [ ! -d "node_modules" ]; then
     echo "  Installing npm packages..."
@@ -168,7 +222,7 @@ fi
 echo ""
 
 # ---------- Port check (Backend & Frontend) ----------
-echo -e "${YELLOW}[5/6] Checking ports ($BACKEND_PORT, $FRONTEND_PORT)...${NC}"
+echo -e "${YELLOW}[6/8] Checking ports ($BACKEND_PORT, $FRONTEND_PORT)...${NC}"
 for port in $BACKEND_PORT $FRONTEND_PORT; do
     service_name="Backend"
     [ $port -eq $FRONTEND_PORT ] && service_name="Frontend"
@@ -201,13 +255,12 @@ done
 echo ""
 
 # ---------- Start servers ----------
-echo -e "${GREEN}[6/6] Starting servers...${NC}"
+echo -e "${GREEN}[7/8] Starting servers...${NC}"
 
 # Backend
 echo -e "  Launching backend (uvicorn) on port $BACKEND_PORT..."
 cd "$BACKEND_DIR"
 source .venv/bin/activate
-# Ensure log file exists
 touch "$BACKEND_LOG"
 nohup uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT > "$BACKEND_LOG" 2>&1 &
 BACKEND_PID=$!

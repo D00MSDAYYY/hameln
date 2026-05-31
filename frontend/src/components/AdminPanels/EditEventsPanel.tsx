@@ -3,6 +3,8 @@ import { Typography, Panel, Flex, IconButton, Button } from '@maxhub/max-ui';
 import { EventFormPanel } from './EventFormPanel';
 import { AttendantsPanel } from './AttendantsPanel';
 import type { EventInfoResponse, UserInfoResponse } from '../../api/types';
+import { adminApi } from '../../api/admin';
+import { userApi } from '../../api/user';
 
 const formatDate = (dateStr: string) => {
   try {
@@ -25,9 +27,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
   const fetchEvents = async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/events', { credentials: 'include' });
-      if (!res.ok) throw new Error('Ошибка загрузки');
-      const data: EventInfoResponse[] = await res.json();
+      const data = await adminApi.getEvents();
       data.sort((a, b) => {
         if (a.is_archived !== b.is_archived) return a.is_archived ? 1 : -1;
         return a.date.localeCompare(b.date);
@@ -53,16 +53,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
   const handleCreate = async (body: Record<string, any>) => {
     try {
       setError(null);
-      const res = await fetch('/api/admin/events', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || `Ошибка ${res.status}`);
-      }
+      await adminApi.createEvent(body);
       await fetchEvents();
       resetState();
     } catch (err: any) {
@@ -72,10 +63,8 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
 
   const handleEditClick = async (event: EventInfoResponse) => {
     try {
-      const detailRes = await fetch(`/api/user/events/${event.id}`, { credentials: 'include' });
-      if (!detailRes.ok) throw new Error('Ошибка загрузки события');
-      const detail: EventInfoResponse = await detailRes.json();
-      setEditingEvent(detail);
+      if (!event.id) return;
+      setEditingEvent(await userApi.getEvent(event.id));
       setCurrentView('edit');
     } catch (err: any) {
       setError(err.message || 'Не удалось загрузить данные');
@@ -86,16 +75,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
     if (!editingEvent) return;
     try {
       setError(null);
-      const res = await fetch(`/api/admin/events/${editingEvent.id}`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || 'Ошибка обновления');
-      }
+      await adminApi.updateEvent(editingEvent.id!, body);
       await fetchEvents();
       resetState();
     } catch (err: any) {
@@ -105,11 +85,8 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
 
   const handleAttendantsClick = async (event: EventInfoResponse) => {
     try {
-      const attRes = await fetch(`/api/admin/events/${event.id}/attendants`, {
-        credentials: 'include',
-      });
-      const attData: UserInfoResponse[] = attRes.ok ? await attRes.json() : [];
-      setAttendants(attData);
+      if (!event.id) return;
+      setAttendants(await adminApi.getEventAttendants(event.id));
       setEditingEvent(event);
       setCurrentView('attendants');
     } catch (err: any) {
@@ -120,13 +97,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
   const handleSaveAttendants = async (attendantIds: number[]) => {
     if (!editingEvent) return;
     try {
-      const res = await fetch(`/api/admin/events/${editingEvent.id}/attendants`, {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(attendantIds),
-      });
-      if (!res.ok) throw new Error('Ошибка сохранения');
+      await adminApi.updateEventAttendants(editingEvent.id!, attendantIds);
       resetState();
     } catch (err: any) {
       setError(err.message || 'Не удалось сохранить посетителей');
@@ -141,14 +112,7 @@ const EditEventsPanel = ({ onBack }: { onBack: () => void }) => {
 
     try {
       setError(null);
-      const res = await fetch(`/api/admin/events/${eventId}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || 'Ошибка удаления');
-      }
+      await adminApi.deleteEvent(eventId);
       await fetchEvents();
     } catch (err: any) {
       setError(err.message || 'Не удалось удалить событие');

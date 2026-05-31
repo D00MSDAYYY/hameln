@@ -7,6 +7,7 @@ import {
     IconButton,
     Input,
 } from '@maxhub/max-ui';
+import { adminApi } from '../../api/admin';
 
 interface ReportPanelProps {
     onBack: () => void;
@@ -15,28 +16,36 @@ interface ReportPanelProps {
 export const ReportPanel = ({ onBack }: ReportPanelProps) => {
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
     const handleGenerateReport = async () => {
         if (!dateFrom || !dateTo) {
-            console.error('Выберите обе даты');
+            setError('Выберите обе даты');
             return;
         }
-        try {
-            const res = await fetch(`/api/admin/report?date_from=${dateFrom}&date_to=${dateTo}`, {
-                credentials: 'include',
-            });
-            if (!res.ok) throw new Error('Ошибка генерации отчёта');
 
-            // Скачиваем файл
-            const blob = await res.blob();
+        setLoading(true);
+        setError('');
+
+        try {
+            const blob = await adminApi.downloadReport({
+                date_from: dateFrom,
+                date_to: dateTo,
+            });
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
+
             a.href = url;
             a.download = `report_${dateFrom}_${dateTo}.xlsx`;
             a.click();
+            a.remove();
+
             window.URL.revokeObjectURL(url);
         } catch (err) {
-            console.error(err);
+            setError(err instanceof Error ? err.message : 'Ошибка генерации отчёта');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -70,17 +79,30 @@ export const ReportPanel = ({ onBack }: ReportPanelProps) => {
                             <Input
                                 type="date"
                                 value={dateFrom}
-                                onChange={(e) => setDateFrom(e.target.value)}
+                                onChange={(e) => {
+                                    setDateFrom(e.target.value);
+                                    setError('');
+                                }}
                             />
                             <Input
                                 type="date"
                                 value={dateTo}
-                                onChange={(e) => setDateTo(e.target.value)}
+                                onChange={(e) => {
+                                    setDateTo(e.target.value);
+                                    setError('');
+                                }}
                             />
                         </Panel>
                     </div>
 
-                    <Button mode="primary" stretched onClick={handleGenerateReport}>
+                    {error && <Typography.Body style={{ color: '#d32f2f' }}>{error}</Typography.Body>}
+
+                    <Button
+                        mode="primary"
+                        stretched
+                        onClick={handleGenerateReport}
+                        loading={loading}
+                    >
                         Создать
                     </Button>
                 </div>

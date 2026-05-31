@@ -1,10 +1,10 @@
 import { Panel, Typography, Flex, Button } from '@maxhub/max-ui';
 
 interface AuthChoicePageProps {
-    onLogin: () => void;
-    onRegister: () => void;
+  onLogin: () => void;
+  onSignUp: () => void;
 }
-export const AuthChoicePage = ({ onLogin, onRegister }: AuthChoicePageProps) => {
+export const AuthChoicePage = ({ onLogin, onSignUp }: AuthChoicePageProps) => {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Panel
@@ -32,7 +32,7 @@ export const AuthChoicePage = ({ onLogin, onRegister }: AuthChoicePageProps) => 
         <Button mode="primary" stretched onClick={onLogin} style={{ fontWeight: 600, height: 48 }}>
           Войти
         </Button>
-        <Button mode="secondary" stretched onClick={onRegister} style={{ fontWeight: 600, height: 48 }}>
+        <Button mode="secondary" stretched onClick={onSignUp} style={{ fontWeight: 600, height: 48 }}>
           Зарегистрироваться
         </Button>
       </Panel>

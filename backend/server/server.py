@@ -1,5 +1,4 @@
 import os
-from datetime import date
 
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
@@ -71,7 +70,6 @@ server.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
-logging.info("hello world1")
 
 
 @server.exception_handler(Exception)
@@ -86,27 +84,17 @@ async def global_exception_handler(
     )
 
 
-@server.post("/user/signup", response_model=UserInfoResponse)
+@server.post("/user/signup", response_model=SignupResponse)
 async def signup(
     body: SignupRequest,
-    response: Response,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
-    logging.info("hello world3")
-
     from server.user.signup.post import f
 
-    try:
-        return f(body, response, db, session_storage)
-    except Exception as e:
-        import traceback
-
-        traceback.print_exc()
-        raise
-
-
-logging.info("hello world2")
+    return f(
+        body,
+        db,
+    )
 
 
 # @server.post("/user/login", response_model=UserInfoResponse)
@@ -133,7 +121,7 @@ async def logout(
 
 @server.get("/user/profile", response_model=UserInfoResponse)
 async def get_profile(
-    request: Request,   
+    request: Request,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
@@ -150,7 +138,7 @@ async def get_profile(
 
 @server.patch("/user/profile", response_model=UserInfoResponse)
 async def update_profile(
-    request: Request,   
+    request: Request,
     profile_data: UserInfoResponse,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -170,7 +158,7 @@ async def update_profile(
 
 @server.get("/user/events", response_model=List[EventInfoResponse])
 async def get_events(
-    request: Request,   
+    request: Request,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
@@ -188,7 +176,7 @@ async def get_events(
 
 @server.get("/user/events/{event_id}", response_model=EventInfoResponse)
 async def get_event_detail(
-    request: Request,   
+    request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -208,7 +196,7 @@ async def get_event_detail(
 
 @server.post("/user/events/{event_id}/register")
 async def register_for_event(
-    request: Request,   
+    request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -228,7 +216,7 @@ async def register_for_event(
 
 @server.delete("/user/events/{event_id}/register")
 async def unregister_from_event(
-    request: Request,   
+    request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -248,7 +236,7 @@ async def unregister_from_event(
 
 @server.get("/user/tags", response_model=List[TagInfoResponse])
 async def get_tags(
-    request: Request,   
+    request: Request,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
@@ -266,7 +254,7 @@ async def get_tags(
 
 @server.get("/user/notifications", response_model=List[NotificationInfoResponse])
 async def get_notifications(
-    request: Request,   
+    request: Request,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
@@ -284,7 +272,7 @@ async def get_notifications(
 
 @server.get("/user/settings", response_model=SettingsResponse)
 async def get_settings(
-    request: Request,   
+    request: Request,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
@@ -302,7 +290,7 @@ async def get_settings(
 
 @server.patch("/user/settings", response_model=SettingsResponse)
 async def update_settings(
-    request: Request,   
+    request: Request,
     new_settings: SettingsResponse,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -322,7 +310,7 @@ async def update_settings(
 
 @server.get("/admin/events", response_model=List[EventInfoResponse])
 async def get_admin_events(
-    request: Request,   
+    request: Request,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
@@ -342,7 +330,7 @@ async def get_admin_events(
 
 @server.post("/admin/events", response_model=EventInfoResponse)
 async def create_event(
-    request: Request,   
+    request: Request,
     event_data: EventInfoResponse,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -364,7 +352,7 @@ async def create_event(
 
 @server.patch("/admin/events/{event_id}", response_model=EventInfoResponse)
 async def update_event(
-    request: Request,   
+    request: Request,
     event_id: int,
     event_data: EventInfoResponse,
     db: Session = Depends(get_db_session),
@@ -388,7 +376,7 @@ async def update_event(
 
 @server.delete("/admin/events/{event_id}")
 async def delete_event(
-    request: Request,   
+    request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -410,7 +398,7 @@ async def delete_event(
 
 @server.get("/admin/search", response_model=List[UserInfoResponse])
 async def search_users(
-    request: Request,   
+    request: Request,
     q: str,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -434,7 +422,7 @@ async def search_users(
     "/admin/events/{event_id}/attendants", response_model=List[UserInfoResponse]
 )
 async def get_event_attendants(
-    request: Request,   
+    request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -456,7 +444,7 @@ async def get_event_attendants(
 
 @server.patch("/admin/events/{event_id}/attendants")
 async def update_event_attendants(
-    request: Request,   
+    request: Request,
     event_id: int,
     attendant_ids: List[int],
     db: Session = Depends(get_db_session),
@@ -480,17 +468,16 @@ async def update_event_attendants(
 
 @server.get("/admin/report", response_class=Response)
 async def generate_report(
-    request: Request,   
-    date_from: date,
-    date_to: date,
+    request: Request,
+    params: ReportRequest = Depends(),
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
     from server.admin.report.get import f
 
     return f(
-        date_from,
-        date_to,
+        params.date_from,
+        params.date_to,
         ensure_admin(
             get_current_user(
                 get_session_id_from_cookie(request),
@@ -504,7 +491,7 @@ async def generate_report(
 
 @server.get("/admin/users", response_model=List[UserInfoResponse])
 async def get_all_users(
-    request: Request,   
+    request: Request,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
@@ -524,7 +511,7 @@ async def get_all_users(
 
 @server.post("/admin/users", response_model=UserInfoResponse)
 async def create_user(
-    request: Request,   
+    request: Request,
     user_data: UserInfoResponse,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
@@ -546,7 +533,7 @@ async def create_user(
 
 @server.patch("/admin/users/{user_id}", response_model=UserInfoResponse)
 async def update_user(
-    request: Request,   
+    request: Request,
     user_id: int,
     user_data: UserInfoResponse,
     db: Session = Depends(get_db_session),
@@ -570,7 +557,7 @@ async def update_user(
 
 @server.delete("/admin/users/{user_id}")
 async def delete_user(
-    request: Request,   
+    request: Request,
     user_id: int,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),

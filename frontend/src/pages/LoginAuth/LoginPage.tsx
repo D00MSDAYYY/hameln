@@ -1,61 +1,64 @@
 import { useState } from 'react';
 import { Panel, Typography, Flex, Button, Input, IconButton } from '@maxhub/max-ui';
+import { authApi } from '../../api/auth';
+import type { UserInfoResponse } from '../../api/types';
 
 interface LoginPageProps {
   onBack: () => void;
-  onSuccess: (user: any) => void; // после успешного входа передаём данные пользователя наверх
+  onSuccess: (user: UserInfoResponse) => void;
 }
 
+type LoginStep = 'email' | 'code';
+
 export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
-  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [step, setStep] = useState<LoginStep>('email');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const cleanEmail = email.trim();
+  const cleanCode = code.trim();
+
   const sendCode = async () => {
-    if (!email.trim()) return;
+    if (!cleanEmail) return;
+
     setLoading(true);
     setError('');
+
     try {
-      const res = await fetch('/api/auth/send-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || 'Ошибка отправки кода');
-      }
+      await authApi.sendLoginCode({ email: cleanEmail });
       setStep('code');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка отправки кода');
     } finally {
       setLoading(false);
     }
   };
 
   const verifyCode = async () => {
-    if (code.trim().length < 4) return;
+    if (cleanCode.length < 4) return;
+
     setLoading(true);
     setError('');
+
     try {
-      const res = await fetch('/auth/verify-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, code }),
+      const user = await authApi.verifyLoginCode({
+        email: cleanEmail,
+        code: cleanCode,
       });
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || 'Неверный код');
-      }
-      const user = await res.json();
       onSuccess(user);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Неверный код');
     } finally {
       setLoading(false);
     }
+  };
+
+  const backToEmail = () => {
+    setCode('');
+    setError('');
+    setStep('email');
   };
 
   return (
@@ -88,7 +91,10 @@ export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
               type="email"
               placeholder="user@example.com"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError('');
+              }}
             />
             {error && <Typography.Body style={{ color: '#d32f2f', marginTop: 8 }}>{error}</Typography.Body>}
             <Button
@@ -96,6 +102,7 @@ export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
               stretched
               onClick={sendCode}
               loading={loading}
+              disabled={!cleanEmail}
               style={{ marginTop: 16, fontWeight: 600 }}
             >
               Получить код
@@ -110,7 +117,10 @@ export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
               type="text"
               placeholder="Код"
               value={code}
-              onChange={(e) => setCode(e.target.value)}
+              onChange={(e) => {
+                setCode(e.target.value);
+                setError('');
+              }}
               maxLength={6}
               style={{ textAlign: 'center', fontSize: 18, letterSpacing: 4 }}
             />
@@ -120,6 +130,7 @@ export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
               stretched
               onClick={verifyCode}
               loading={loading}
+              disabled={cleanCode.length < 4}
               style={{ marginTop: 16, fontWeight: 600 }}
             >
               Подтвердить
@@ -127,7 +138,7 @@ export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
             <Button
               mode="tertiary"
               stretched
-              onClick={() => setStep('email')}
+              onClick={backToEmail}
               style={{ marginTop: 8 }}
             >
               Назад к email

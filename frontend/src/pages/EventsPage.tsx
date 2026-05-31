@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { EventCard } from '../components/EventCard/EventCard';
 import { EventInfoDisplayer } from '../components/EventInfoDisplayer';
 import type { EventInfoResponse } from '../api/types';
+import { userApi } from '../api/user';
 
 const EventsPage = () => {
   const [events, setEvents] = useState<EventInfoResponse[]>([]);
@@ -14,10 +15,7 @@ const EventsPage = () => {
     const fetchEvents = async () => {
       try {
         setLoading(true);
-        const res = await fetch('/api/user/events', { credentials: 'include' });
-        if (!res.ok) throw new Error('Ошибка загрузки событий');
-        const data: EventInfoResponse[] = await res.json();
-        setEvents(data);
+        setEvents(await userApi.getEvents());
       } catch (err: any) {
         setError(err.message || 'Неизвестная ошибка');
       } finally {
@@ -30,24 +28,14 @@ const EventsPage = () => {
 
 
   const handleMoreClick = async (eventId: number) => {
-    const res = await fetch(`/api/user/events/${eventId}`, { credentials: 'include' });
-    const detail: EventInfoResponse = await res.json();
-    setSelectedEvent(detail);
+    setSelectedEvent(await userApi.getEvent(eventId));
   };
 
   const handleBack = () => setSelectedEvent(null);
 
   const handleRegisterSwapped = async (eventId: number) => {
     try {
-      const res = await fetch(`/api/user/events/${eventId}/register`, {
-        method: 'POST',
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        console.error('Ошибка регистрации:', data.detail);
-        return;
-      }
+      await userApi.registerEvent(eventId);
       setEvents(prev =>
         prev.map(e => (e.id === eventId ? { ...e, is_registered: true } : e))
       );
@@ -58,15 +46,7 @@ const EventsPage = () => {
 
   const handleUnregisterSwapped = async (eventId: number) => {
     try {
-      const res = await fetch(`/api/user/events/${eventId}/register`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        console.error('Ошибка отмены:', data.detail);
-        return;
-      }
+      await userApi.unregisterEvent(eventId);
       setEvents(prev =>
         prev.map(e => (e.id === eventId ? { ...e, is_registered: false } : e))
       );

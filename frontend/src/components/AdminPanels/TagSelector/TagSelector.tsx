@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Input, Flex, Panel, Typography, IconButton, Spinner } from '@maxhub/max-ui';
 import type { TagInfoResponse } from '../../../api/types';
+import { userApi } from '../../../api/user';
 
 interface TagSelectorProps {
   selected: TagInfoResponse[];
@@ -17,18 +18,9 @@ export const TagSelector = ({ selected, onChange }: TagSelectorProps) => {
 
   // Загрузка всех тегов с сервера
   useEffect(() => {
-    console.log('[TagSelector] Загружаю теги с /user/tags ...');
-    fetch('/api/user/tags', { credentials: 'include' })
-      .then(async res => {
-        console.log('[TagSelector] Статус ответа:', res.status);
-        if (!res.ok) {
-          console.log('[TagSelector] Ответ не ok, читаю текст ошибки...');
-          const text = await res.text();
-          console.log('[TagSelector] Текст ответа:', text);
-          throw new Error(`HTTP ${res.status}`);
-        }
-        const data = await res.json();
-        console.log('[TagSelector] Получены теги:', data);
+    userApi
+      .getTags()
+      .then((data) => {
         setAllTags(data || []);
       })
       .catch(err => {
