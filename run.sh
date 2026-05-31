@@ -1,4 +1,11 @@
 #!/usr/bin/env bash
+# Адаптировано для Debian
+
+# Если скрипт запущен через sh (dash), перезапускаем себя через bash
+if [ -z "$BASH_VERSION" ]; then
+    exec bash "$0" "$@"
+fi
+
 set -euo pipefail
 
 GREEN='\033[0;32m'
@@ -10,7 +17,7 @@ NC='\033[0m'
 FORCE=false
 for arg in "$@"; do
     case $arg in
-        (--force)
+        --force)
             FORCE=true
             shift
             ;;
@@ -45,15 +52,13 @@ python_sqlite_works() {
 # ---------- CHECK & FIX BROKEN CONDA / SQLITE ----------
 echo -e "${YELLOW}[1/8] Checking for Conda Python / SQLite issues...${NC}"
 
-# If Conda is active and its python's sqlite3 is broken, deactivate it
+# Если Conda активна, но её Python сломан — деактивируем
 if [[ -n "${CONDA_PREFIX:-}" ]] && ! python_sqlite_works "${CONDA_PREFIX}/bin/python"; then
     echo -e "  ${YELLOW}Conda Python has a broken sqlite3 module (likely due to xz backdoor).${NC}"
     echo -e "  ${YELLOW}Deactivating Conda and falling back to system Python...${NC}"
     
-    # Try to deactivate conda completely
     conda deactivate 2>/dev/null || true
     unset CONDA_PREFIX
-    # Refresh PATH to remove conda's bin directory
     export PATH=$(echo "$PATH" | tr ':' '\n' | grep -v "conda" | tr '\n' ':')
     
     echo -e "  ${GREEN}Conda deactivated. Now using: $(which python3)${NC}"
@@ -63,7 +68,7 @@ else
     echo -e "  ${GREEN}No active Conda environment. Using: $(which python3)${NC}"
 fi
 
-# Determine which python3 to use for venv creation
+# Определяем системный Python
 SYSTEM_PYTHON=$(which python3)
 if ! python_sqlite_works "$SYSTEM_PYTHON"; then
     echo -e "${RED}Error: The system Python ($SYSTEM_PYTHON) also has a broken sqlite3 module.${NC}"
@@ -73,34 +78,45 @@ fi
 echo -e "  Using Python for venv: $SYSTEM_PYTHON ($($SYSTEM_PYTHON --version))"
 echo ""
 
-# ---------- Check prerequisites (node, npm, etc.) ----------
+# ---------- Check prerequisites ----------
 echo -e "${YELLOW}[2/8] Checking environment...${NC}"
+
+# Python
 if ! command -v python3 &>/dev/null; then
-    echo -e "${RED}Error: python3 not found. Please install Python 3.${NC}"
+    echo -e "${RED}Error: python3 not found. Please install Python 3: sudo apt install python3 python3-venv python3-pip${NC}"
     exit 1
 fi
+# python3-venv (Debian often missing)
+if ! python3 -c "import venv" &>/dev/null; then
+    echo -e "${RED}Error: python3-venv module not found. Install it: sudo apt install python3-venv${NC}"
+    exit 1
+fi
+
+# Node.js & npm
 if ! command -v node &>/dev/null; then
-    echo -e "${RED}Error: Node.js not found. Please install Node.js.${NC}"
+    echo -e "${RED}Error: Node.js not found. Please install Node.js from https://nodejs.org or using 'sudo apt install nodejs npm'${NC}"
     exit 1
 fi
 if ! command -v npm &>/dev/null; then
-    echo -e "${RED}Error: npm not found. Please install npm.${NC}"
+    echo -e "${RED}Error: npm not found. Please install npm: sudo apt install npm${NC}"
     exit 1
 fi
 echo -e "  node:     $(node -v 2>&1)"
 echo -e "  npm:      $(npm -v 2>&1)"
 echo ""
 
-# ---------- Port check function ----------
+# ---------- Port check function (Debian-friendly) ----------
 port_in_use() {
     local port=$1
-    if command -v lsof &>/dev/null; then
-        lsof -i :"$port" -sTCP:LISTEN -t &>/dev/null
-    elif command -v ss &>/dev/null; then
+    # ss is standard on Debian
+    if command -v ss &>/dev/null; then
         ss -tuln | grep -q ":$port "
     elif command -v netstat &>/dev/null; then
         netstat -tuln | grep -q ":$port "
+    elif command -v lsof &>/dev/null; then
+        lsof -i :"$port" -sTCP:LISTEN -t &>/dev/null
     else
+        # fallback: try to connect using bash's /dev/tcp
         (echo > /dev/tcp/localhost/$port) &>/dev/null
         return $?
     fi
@@ -108,23 +124,21 @@ port_in_use() {
 
 get_pid_by_port() {
     local port=$1
-    if command -v lsof &>/dev/null; then
-        lsof -i :"$port" -sTCP:LISTEN -t 2>/dev/null
-    elif command -v ss &>/dev/null; then
-        ss -tlnp | grep ":$port " | grep -oP 'pid=\K[0-9]+'
+    if command -v ss &>/dev/null; then
+        ss -tlnp 2>/dev/null | grep ":$port " | grep -oP 'pid=\K[0-9]+'
     elif command -v netstat &>/dev/null; then
-        netstat -tlnp | grep ":$port " | awk '{print $NF}' | grep -oP '[0-9]+'
+        netstat -tlnp 2>/dev/null | grep ":$port " | awk '{print $NF}' | grep -oP '[0-9]+'
+    elif command -v lsof &>/dev/null; then
+        lsof -i :"$port" -sTCP:LISTEN -t 2>/dev/null
     fi
 }
 
-# ---------- Redis Setup & Flush ----------
+# ---------- Redis Setup & Flush (Debian: apt install redis-server) ----------
 echo -e "${YELLOW}[3/8] Checking & Flushing Redis...${NC}"
 if ! command -v redis-server &>/dev/null; then
     echo -e "${RED}Error: redis-server is not installed.${NC}"
-    echo -e "Please install it:"
-    echo -e "  macOS: brew install redis"
-    echo -e "  Linux: sudo apt install redis-server"
-    echo -e "  Docker: docker run -d -p 6379:6379 redis"
+    echo -e "Please install it: sudo apt install redis-server"
+    echo -e "Then start: sudo systemctl enable redis-server && sudo systemctl start redis-server"
     exit 1
 fi
 
@@ -138,15 +152,11 @@ if redis-cli ping &>/dev/null; then
     fi
 else
     echo -e "  Redis is not running. Attempting to start..."
-    if command -v brew &>/dev/null && brew services list | grep -q redis; then
-        brew services start redis
-    elif command -v systemctl &>/dev/null; then
-        sudo systemctl start redis-server || sudo systemctl start redis
-    elif command -v redis-server &>/dev/null; then
-        redis-server --daemonize yes
+    # Debian with systemd
+    if command -v systemctl &>/dev/null; then
+        sudo systemctl start redis-server 2>/dev/null || sudo systemctl start redis 2>/dev/null || true
     else
-        echo -e "${RED}Could not start Redis automatically.${NC}"
-        exit 1
+        redis-server --daemonize yes 2>/dev/null || true
     fi
     
     echo -n "  Waiting for Redis to accept connections"
@@ -161,6 +171,7 @@ else
     
     if ! redis-cli ping &>/dev/null; then
         echo -e "\n${RED}Error: Redis failed to start on port $REDIS_PORT.${NC}"
+        echo "Try manual: sudo systemctl start redis-server"
         exit 1
     fi
     
@@ -172,7 +183,6 @@ echo ""
 echo -e "${YELLOW}[4/8] Setting up backend...${NC}"
 cd "$BACKEND_DIR"
 
-# Check if .venv exists and if its Python is working
 VENV_PYTHON="$BACKEND_DIR/.venv/bin/python"
 NEED_RECREATE=false
 
@@ -198,7 +208,6 @@ if [ ! -d ".venv" ] || [ "$NEED_RECREATE" = true ]; then
     "$SYSTEM_PYTHON" -m venv .venv
 fi
 
-# Activate venv
 source .venv/bin/activate
 
 echo "  Installing Python dependencies..."
