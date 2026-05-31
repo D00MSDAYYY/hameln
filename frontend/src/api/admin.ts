@@ -1,5 +1,13 @@
 import { apiRequest } from './client';
-import type { EventInfoResponse, ReportRequest, UserInfoResponse } from './types';
+import type {
+  EventInfoResponse,
+  ReportRequest,
+  SignupRequest,
+  SignupRequestInfoResponse,
+  SignupResponse,
+  UserInfoResponse,
+  UserRequest,
+} from './types';
 
 export const adminApi = {
   getEvents: () => apiRequest<EventInfoResponse[]>('/api/admin/events'),
@@ -34,13 +42,13 @@ export const adminApi = {
 
   getUsers: () => apiRequest<UserInfoResponse[]>('/api/admin/users'),
 
-  createUser: (payload: Partial<UserInfoResponse>) =>
+  createUser: (payload: UserRequest) =>
     apiRequest<UserInfoResponse>('/api/admin/users', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
 
-  updateUser: (userId: number, payload: Partial<UserInfoResponse>) =>
+  updateUser: (userId: number, payload: UserRequest) =>
     apiRequest<UserInfoResponse>(`/api/admin/users/${userId}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
@@ -50,6 +58,25 @@ export const adminApi = {
     apiRequest<void>(`/api/admin/users/${userId}`, {
       method: 'DELETE',
       parseAs: 'empty',
+    }),
+
+  getSignupRequests: () =>
+    apiRequest<SignupRequestInfoResponse[]>('/api/admin/signup_requests'),
+
+  updateSignupRequest: (requestId: number, payload: SignupRequest) =>
+    apiRequest<SignupRequestInfoResponse>(`/api/admin/signup_requests/${requestId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    }),
+
+  approveSignupRequest: (requestId: number) =>
+    apiRequest<SignupResponse>(`/api/admin/signup_requests/${requestId}/approve`, {
+      method: 'POST',
+    }),
+
+  deleteSignupRequest: (requestId: number) =>
+    apiRequest<SignupResponse>(`/api/admin/signup_requests/${requestId}`, {
+      method: 'DELETE',
     }),
 
   searchUsers: (query: string) => {

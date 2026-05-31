@@ -35,6 +35,11 @@ def ensure_admin(user):
     return user
 
 
+def user_to_response(user: User, role: Role):
+    data = UserInfoResponse.model_validate(user, from_attributes=True)
+    return visible_fields_response(data, role=role)
+
+
 def event_to_response(
     event: Event,
     role: Role,

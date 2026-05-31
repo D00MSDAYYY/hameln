@@ -1,7 +1,7 @@
 from sqlmodel import select
 
 from fastapi import HTTPException
-from pydantic_visible_fields import visible_fields_response
+from server.aux import user_to_response
 
 from models.internal import Event, Attendance, User
 
@@ -22,4 +22,4 @@ def f(event_id, admin, session):
         User.id.in_(attendant_ids)  # type: ignore[attr-defined]
     )
     users = session.exec(statement).all()
-    return [visible_fields_response(u, role=admin.role) for u in users]
+    return [user_to_response(u, role=admin.role) for u in users]

@@ -3,10 +3,11 @@ import { Typography, Panel, CellList, CellSimple } from '@maxhub/max-ui';
 import EditEventsPanel from '../components/AdminPanels/EditEventsPanel';
 import ReportPanel from '../components/AdminPanels/ReportPanel';
 import EditUsersPanel from '../components/AdminPanels/EditUsersPanel';
+import SignupRequestsPanel from '../components/AdminPanels/SignupRequestsPanel';
 
 const AdminPage = () => {
   const [currentView, setCurrentView] = useState<
-    'main' | 'editEvents' | 'createReport' | 'editUsers' | 'debugConsole'
+    'main' | 'editEvents' | 'createReport' | 'editUsers' | 'signupRequests' | 'debugConsole'
   >('main');
 
   if (currentView === 'editEvents') {
@@ -19,6 +20,10 @@ const AdminPage = () => {
 
   if (currentView === 'editUsers') {
     return <EditUsersPanel onBack={() => setCurrentView('main')} />;
+  }
+
+  if (currentView === 'signupRequests') {
+    return <SignupRequestsPanel onBack={() => setCurrentView('main')} />;
   }
 
   return (
@@ -50,6 +55,11 @@ const AdminPage = () => {
               title="Редактировать участников"
               showChevron
               onClick={() => setCurrentView('editUsers')}
+            />
+            <CellSimple
+              title="Заявки"
+              showChevron
+              onClick={() => setCurrentView('signupRequests')}
             />
           </CellList>
         </div>

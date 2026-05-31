@@ -10,7 +10,8 @@ traceback.print_exc(file=sys.stdout)
 
 import redis
 
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, create_engine, select
+from sqlalchemy import inspect, text
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, Request, Depends
@@ -25,12 +26,73 @@ load_dotenv(".env")
 SESSION_TTL = int(os.getenv("SESSION_TTL", "86400"))
 VERIFICATION_CODE_TTL = int(os.getenv("VERIFICATION_CODE_TTL", "300"))
 BACKEND_DIR = str(os.getenv("BACKEND_DIR", "."))
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
 
 _db = create_engine(f"sqlite:///{BACKEND_DIR}/hameln.db", echo=False)
 
 
+def add_column_if_missing(table_name: str, column_name: str, ddl: str):
+    inspector = inspect(_db)
+    columns = {column["name"] for column in inspector.get_columns(table_name)}
+
+    if column_name not in columns:
+        with _db.begin() as connection:
+            connection.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {ddl}"))
+
+
+def init_legacy_schema():
+    if _db.dialect.name != "sqlite":
+        return
+
+    inspector = inspect(_db)
+    tables = set(inspector.get_table_names())
+
+    if "user" in tables:
+        add_column_if_missing("user", "phone", "phone VARCHAR")
+        add_column_if_missing("user", "password", "password VARCHAR")
+
+        with _db.begin() as connection:
+            connection.execute(
+                text("CREATE UNIQUE INDEX IF NOT EXISTS ix_user_phone ON user (phone)")
+            )
+
+    if "signuprequest" in tables:
+        add_column_if_missing("signuprequest", "phone", "phone VARCHAR")
+
+
+def init_admin_user():
+    if not ADMIN_EMAIL or not ADMIN_PASSWORD:
+        return
+
+    with Session(_db) as session:
+        admin = session.exec(select(User).where(User.email == ADMIN_EMAIL)).first()
+
+        if admin:
+            admin.role = Role.admin
+            admin.password = ADMIN_PASSWORD
+        else:
+            admin = User(
+                nickname=ADMIN_EMAIL,
+                firstname="Admin",
+                middlename="",
+                lastname="User",
+                company=None,
+                email=ADMIN_EMAIL,
+                phone=None,
+                password=ADMIN_PASSWORD,
+                role=Role.admin,
+            )
+            session.add(admin)
+
+        session.commit()
+
+
 def init_database():
     SQLModel.metadata.create_all(_db)
+    init_legacy_schema()
+    init_admin_user()
+
 
 
 @asynccontextmanager
@@ -97,15 +159,16 @@ async def signup(
     )
 
 
-# @server.post("/user/login", response_model=UserInfoResponse)
-# async def login(
-#     login_data: LoginRequest,
-#     response: Response,
-#     db: Session = Depends(get_db_session),
-#     session_storage: UserSessionStorage = Depends(get_session_storage),
-# ):
-#     from server.user.login.post import f
-#     return f(login_data, response, db, session_storage)
+@server.post("/user/login", response_model=UserInfoResponse)
+async def login(
+    login_data: LoginRequest,
+    response: Response,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
+    from server.user.login.post import f
+
+    return f(login_data, response, db, session_storage)
 
 
 @server.post("/user/logout")
@@ -396,6 +459,85 @@ async def delete_event(
     )
 
 
+@server.get("/admin/signup_requests", response_model=List[SignupRequestInfoResponse])
+async def get_signup_requests(
+    request: Request,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
+    from server.admin.signup_requests.get import f
+
+    ensure_admin(
+        get_current_user(
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
+        )
+    )
+    return f(db)
+
+
+@server.patch(
+    "/admin/signup_requests/{request_id}",
+    response_model=SignupRequestInfoResponse,
+)
+async def update_signup_request(
+    request: Request,
+    request_id: int,
+    body: SignupRequest,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
+    from server.admin.signup_requests.request_id.patch import f
+
+    ensure_admin(
+        get_current_user(
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
+        )
+    )
+    return f(request_id, body, db)
+
+
+@server.post("/admin/signup_requests/{request_id}/approve", response_model=SignupResponse)
+async def approve_signup_request(
+    request: Request,
+    request_id: int,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
+    from server.admin.signup_requests.request_id.approve.post import f
+
+    ensure_admin(
+        get_current_user(
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
+        )
+    )
+    return f(request_id, db)
+
+
+@server.delete("/admin/signup_requests/{request_id}", response_model=SignupResponse)
+async def delete_signup_request(
+    request: Request,
+    request_id: int,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
+    from server.admin.signup_requests.delete import f
+
+    ensure_admin(
+        get_current_user(
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
+        )
+    )
+    return f(request_id, db)
+
+
 @server.get("/admin/search", response_model=List[UserInfoResponse])
 async def search_users(
     request: Request,
@@ -512,7 +654,7 @@ async def get_all_users(
 @server.post("/admin/users", response_model=UserInfoResponse)
 async def create_user(
     request: Request,
-    user_data: UserInfoResponse,
+    user_data: UserRequest,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
@@ -535,7 +677,7 @@ async def create_user(
 async def update_user(
     request: Request,
     user_id: int,
-    user_data: UserInfoResponse,
+    user_data: UserRequest,
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):

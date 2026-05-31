@@ -1,9 +1,27 @@
 from sqlmodel import select
 from fastapi import HTTPException
-from pydantic_visible_fields import visible_fields_response
+from server.aux import user_to_response
 
 
 from models.internal import User, Role
+
+
+REQUIRED_STRING_FIELDS = {"nickname", "firstname", "middlename", "lastname"}
+
+
+def normalize_update_dict(update_dict):
+    normalized = {}
+
+    for field, value in update_dict.items():
+        if field in REQUIRED_STRING_FIELDS:
+            if value is None:
+                value = ""
+            if field != "middlename" and not str(value).strip():
+                raise HTTPException(status_code=400, detail="Заполните обязательные поля")
+
+        normalized[field] = value
+
+    return normalized
 
 
 def f(user_id, user_data, admin, session):
@@ -12,7 +30,9 @@ def f(user_id, user_data, admin, session):
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
     # Обновляем только переданные поля
-    update_dict = user_data.model_dump(exclude_unset=True, exclude={"id", "created_at"})
+    update_dict = normalize_update_dict(
+        user_data.model_dump(exclude_unset=True, exclude={"id", "created_at"})
+    )
 
     # Проверяем уникальность никнейма, если он меняется
     if "nickname" in update_dict and update_dict["nickname"] != user.nickname:
@@ -36,4 +56,4 @@ def f(user_id, user_data, admin, session):
     session.commit()
     session.refresh(user)
 
-    return visible_fields_response(user, role=admin.role)
+    return user_to_response(user, role=admin.role)

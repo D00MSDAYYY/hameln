@@ -24,8 +24,9 @@ export interface TagInfoResponse {
   id?: number | null;
   title?: string | null;
 }
-export interface LoginCodeRequest {
-  email: string;
+export interface LoginRequest {
+  contact: string;
+  password: string;
 }
 export interface NotificationInfoResponse {
   id?: number | null;
@@ -43,11 +44,22 @@ export interface SettingsResponse {
   do_notify?: boolean | null;
 }
 export interface SignupRequest {
-  email: string;
+  email?: string | null;
+  phone?: string | null;
   firstname: string;
   lastname: string;
   middlename: string;
   company: string;
+}
+export interface SignupRequestInfoResponse {
+  id?: number | null;
+  firstname?: string | null;
+  middlename?: string | null;
+  lastname?: string | null;
+  company?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  created_at?: string | null;
 }
 export interface SignupResponse {
   message: string;
@@ -56,17 +68,27 @@ export interface UserInfoResponse {
   id?: number | null;
   nickname?: string | null;
   role?: Role | null;
+  password?: string | null;
   firstname?: string | null;
   middlename?: string | null;
   lastname?: string | null;
   points?: number | null;
   company?: string | null;
-  email?: string;
+  email?: string | null;
+  phone?: string | null;
   created_at?: string | null;
 }
-export interface VerifyCodeRequest {
-  email: string;
-  code: string;
+export interface UserRequest {
+  nickname?: string | null;
+  role?: string | null;
+  firstname?: string | null;
+  middlename?: string | null;
+  lastname?: string | null;
+  points?: number | null;
+  company?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  password?: string | null;
 }
 /**
  * Base class for Pydantic models supporting role-based field visibility.

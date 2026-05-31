@@ -1,11 +1,10 @@
 import { userApi } from './user';
 import { apiRequest } from './client';
 import type {
-  LoginCodeRequest,
+  LoginRequest,
   SignupRequest,
   SignupResponse,
   UserInfoResponse,
-  VerifyCodeRequest,
 } from './types';
 
 export const authApi = {
@@ -17,15 +16,8 @@ export const authApi = {
       body: JSON.stringify(payload),
     }),
 
-  sendLoginCode: (payload: LoginCodeRequest) =>
-    apiRequest<void>('/api/auth/send-code', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      parseAs: 'empty',
-    }),
-
-  verifyLoginCode: (payload: VerifyCodeRequest) =>
-    apiRequest<UserInfoResponse>('/api/auth/verify-code', {
+  login: (payload: LoginRequest) =>
+    apiRequest<UserInfoResponse>('/api/user/login', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),

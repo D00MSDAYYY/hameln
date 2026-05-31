@@ -1,4 +1,4 @@
-from pydantic_visible_fields import visible_fields_response
+from server.aux import user_to_response
 
 
 def f(profile_data, user, session):
@@ -14,4 +14,4 @@ def f(profile_data, user, session):
     session.commit()
     session.refresh(user)
 
-    return visible_fields_response(user, role=user.role)
+    return user_to_response(user, role=user.role)

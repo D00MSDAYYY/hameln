@@ -1,7 +1,6 @@
 from sqlmodel import select, func
 
-from pydantic_visible_fields import visible_fields_response
-
+from server.aux import user_to_response
 
 from models.internal import User
 
@@ -17,4 +16,4 @@ def f(q, admin, session):
 
     users = session.exec(statement).all()
 
-    return [visible_fields_response(u, role=admin.role) for u in users]
+    return [user_to_response(u, role=admin.role) for u in users]

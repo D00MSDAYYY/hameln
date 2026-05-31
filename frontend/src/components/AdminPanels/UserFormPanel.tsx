@@ -27,21 +27,23 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
   const [lastname, setLastname] = useState(initial?.lastname || '');
   const [middlename, setMiddlename] = useState(initial?.middlename || '');
   const [company, setCompany] = useState(initial?.company || '');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(initial?.email || '');
+  const [phone, setPhone] = useState(initial?.phone || '');
+  const [password, setPassword] = useState(initial?.password || '');
   const [role, setRole] = useState(initial?.role || 'user');
   const [points, setPoints] = useState(String(initial?.points ?? 0));
 
   useEffect(() => {
-    if (initial) {
-      setNickname(initial.nickname || '');
-      setFirstname(initial.firstname || '');
-      setLastname(initial.lastname || '');
-      setMiddlename(initial.middlename || '');
-      setCompany(initial.company || '');
-      setPassword('');
-      setRole(initial.role || 'user');
-      setPoints(String(initial.points ?? 0));
-    }
+    setNickname(initial?.nickname || '');
+    setFirstname(initial?.firstname || '');
+    setLastname(initial?.lastname || '');
+    setMiddlename(initial?.middlename || '');
+    setCompany(initial?.company || '');
+    setEmail(initial?.email || '');
+    setPhone(initial?.phone || '');
+    setPassword(initial?.password || '');
+    setRole(initial?.role || 'user');
+    setPoints(String(initial?.points ?? 0));
   }, [initial]);
 
   const handleSubmit = () => {
@@ -50,17 +52,19 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
     }
 
     const body: Record<string, any> = {
-      nickname,
-      firstname,
-      lastname,
-      middlename: middlename || null,
-      company: company || null,
+      nickname: nickname.trim(),
+      firstname: firstname.trim(),
+      lastname: lastname.trim(),
+      middlename: middlename.trim(),
+      company: company.trim() || null,
+      email: email.trim() || null,
+      phone: phone.trim() || null,
       role,
       points: parseInt(points, 10) || 0,
     };
 
-    if (!initial || password) {
-      body.password = password;
+    if (!initial || password.trim()) {
+      body.password = password.trim();
     }
 
     onSave(body);
@@ -119,6 +123,30 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
             placeholder="Введите компанию"
             value={company}
             onChange={(e) => setCompany(e.target.value)}
+          />
+        </Panel>
+      </div>
+
+      <div>
+        <Typography.Title variant="small-strong">Email</Typography.Title>
+        <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
+          <Input
+            type="email"
+            placeholder="Введите email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </Panel>
+      </div>
+
+      <div>
+        <Typography.Title variant="small-strong">Телефон</Typography.Title>
+        <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
+          <Input
+            type="tel"
+            placeholder="Введите телефон"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
           />
         </Panel>
       </div>

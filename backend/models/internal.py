@@ -6,12 +6,23 @@ from typing import List
 from sqlmodel import Field, Relationship, SQLModel, func
 from pydantic import BaseModel, EmailStr
 from sqlalchemy import JSON, Column
+from pydantic_visible_fields import configure_roles
 
 
 class Role(Enum):
     admin = "admin"
     user = "user"
     observer = "observer"
+
+
+configure_roles(
+    role_enum=Role,
+    inheritance={
+        Role.admin: [Role.user],
+        Role.user: [Role.observer],
+    },
+    default_role=Role.observer,
+)
 
 
 class AppTheme(Enum):
@@ -35,7 +46,8 @@ class UserBase(SQLModel):
 
     company: str | None = Field(default=None)
 
-    email: EmailStr = Field(unique=True, index=True)
+    email: EmailStr | None = Field(default=None, unique=True, index=True)
+    phone: str | None = Field(default=None, unique=True, index=True)
 
     created_at: datetime = Field(
         sa_column_kwargs={"server_default": func.now()}, default=None
@@ -45,6 +57,7 @@ class UserBase(SQLModel):
 class User(UserBase, table=True):
     role: Role = Field(default=Role.user)
     nickname: str
+    password: str
     points: int = Field(default=0)
 
 

@@ -8,57 +8,32 @@ interface LoginPageProps {
   onSuccess: (user: UserInfoResponse) => void;
 }
 
-type LoginStep = 'email' | 'code';
-
 export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
-  const [step, setStep] = useState<LoginStep>('email');
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
+  const [contact, setContact] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const cleanEmail = email.trim();
-  const cleanCode = code.trim();
+  const cleanContact = contact.trim();
+  const cleanPassword = password.trim();
 
-  const sendCode = async () => {
-    if (!cleanEmail) return;
-
-    setLoading(true);
-    setError('');
-
-    try {
-      await authApi.sendLoginCode({ email: cleanEmail });
-      setStep('code');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка отправки кода');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const verifyCode = async () => {
-    if (cleanCode.length < 4) return;
+  const login = async () => {
+    if (!cleanContact || !cleanPassword) return;
 
     setLoading(true);
     setError('');
 
     try {
-      const user = await authApi.verifyLoginCode({
-        email: cleanEmail,
-        code: cleanCode,
+      const user = await authApi.login({
+        contact: cleanContact,
+        password: cleanPassword,
       });
       onSuccess(user);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Неверный код');
+      setError(err instanceof Error ? err.message : 'Ошибка входа');
     } finally {
       setLoading(false);
     }
-  };
-
-  const backToEmail = () => {
-    setCode('');
-    setError('');
-    setStep('email');
   };
 
   return (
@@ -82,69 +57,38 @@ export const LoginPage = ({ onBack, onSuccess }: LoginPageProps) => {
           <div style={{ width: 48 }} />
         </Flex>
 
-        {step === 'email' ? (
-          <>
-            <Typography.Body style={{ marginBottom: 16 }}>
-              Введите email, на который мы отправим код подтверждения
-            </Typography.Body>
-            <Input
-              type="email"
-              placeholder="user@example.com"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setError('');
-              }}
-            />
-            {error && <Typography.Body style={{ color: '#d32f2f', marginTop: 8 }}>{error}</Typography.Body>}
-            <Button
-              mode="primary"
-              stretched
-              onClick={sendCode}
-              loading={loading}
-              disabled={!cleanEmail}
-              style={{ marginTop: 16, fontWeight: 600 }}
-            >
-              Получить код
-            </Button>
-          </>
-        ) : (
-          <>
-            <Typography.Body style={{ marginBottom: 16 }}>
-              Введите код, отправленный на {email}
-            </Typography.Body>
-            <Input
-              type="text"
-              placeholder="Код"
-              value={code}
-              onChange={(e) => {
-                setCode(e.target.value);
-                setError('');
-              }}
-              maxLength={6}
-              style={{ textAlign: 'center', fontSize: 18, letterSpacing: 4 }}
-            />
-            {error && <Typography.Body style={{ color: '#d32f2f', marginTop: 8 }}>{error}</Typography.Body>}
-            <Button
-              mode="primary"
-              stretched
-              onClick={verifyCode}
-              loading={loading}
-              disabled={cleanCode.length < 4}
-              style={{ marginTop: 16, fontWeight: 600 }}
-            >
-              Подтвердить
-            </Button>
-            <Button
-              mode="tertiary"
-              stretched
-              onClick={backToEmail}
-              style={{ marginTop: 8 }}
-            >
-              Назад к email
-            </Button>
-          </>
-        )}
+        <Typography.Body style={{ marginBottom: 16 }}>
+          Введите email или телефон, указанный в заявке, и пароль
+        </Typography.Body>
+        <Input
+          placeholder="Email или телефон"
+          value={contact}
+          onChange={(e) => {
+            setContact(e.target.value);
+            setError('');
+          }}
+        />
+        <Input
+          type="password"
+          placeholder="Пароль"
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setError('');
+          }}
+          style={{ marginTop: 12 }}
+        />
+        {error && <Typography.Body style={{ color: '#d32f2f', marginTop: 8 }}>{error}</Typography.Body>}
+        <Button
+          mode="primary"
+          stretched
+          onClick={login}
+          loading={loading}
+          disabled={!cleanContact || !cleanPassword}
+          style={{ marginTop: 16, fontWeight: 600 }}
+        >
+          Войти
+        </Button>
       </Panel>
     </div>
   );
