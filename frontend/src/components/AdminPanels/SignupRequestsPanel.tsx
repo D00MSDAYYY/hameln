@@ -9,6 +9,13 @@ import {
 } from '@maxhub/max-ui';
 import { adminApi } from '../../api/admin';
 import type { SignupRequest, SignupRequestInfoResponse } from '../../api/types';
+import {
+  buildRussianPhone,
+  getPhoneTail,
+  isCompletePhoneTail,
+  PhoneInput,
+} from '../PhoneInput';
+import { isValidPersonName } from '../../utils/personName';
 
 type ViewMode = 'list' | 'edit';
 
@@ -28,14 +35,14 @@ const buildPayload = ({
   lastname,
   company,
 }: SignupRequestInfoResponse): SignupRequest => ({
-  phone: phone?.trim() || '',
+  phone: buildRussianPhone(phone || ''),
   firstname: firstname?.trim() || '',
   lastname: lastname?.trim() || '',
   company: company?.trim() || '',
 });
 
 const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps) => {
-  const [phone, setPhone] = useState(initial.phone || '');
+  const [phone, setPhone] = useState(getPhoneTail(initial.phone));
   const [firstname, setFirstname] = useState(initial.firstname || '');
   const [lastname, setLastname] = useState(initial.lastname || '');
   const [company, setCompany] = useState(initial.company || '');
@@ -49,12 +56,12 @@ const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps
       company,
     });
 
-    if (!payload.phone) {
-      setError('Укажите телефон');
+    if (!isCompletePhoneTail(phone)) {
+      setError('Введите 10 цифр номера');
       return;
     }
 
-    if (!payload.firstname || !payload.lastname || !payload.company) {
+    if (!isValidPersonName(payload.firstname) || !isValidPersonName(payload.lastname) || !payload.company) {
       setError('Заполните обязательные поля');
       return;
     }
@@ -68,11 +75,9 @@ const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps
       <div>
         <Typography.Title variant="small-strong">Телефон</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input
-            type="tel"
-            placeholder="Введите телефон"
+          <PhoneInput
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={setPhone}
           />
         </Panel>
       </div>
@@ -115,9 +120,6 @@ const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps
       <Flex gap={12} style={{ marginTop: 20 }}>
         <Button mode="primary" stretched onClick={handleSubmit}>
           Сохранить
-        </Button>
-        <Button mode="tertiary" stretched onClick={onCancel}>
-          Отмена
         </Button>
       </Flex>
     </div>

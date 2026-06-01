@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Typography, Panel, Switch, Input, IconButton, Flex, Button } from '@maxhub/max-ui';
 import type { UserInfoResponse } from '../api/types';
 import { userApi } from '../api/user';
+import { isValidPersonName } from '../utils/personName';
 
 interface SettingsPanelProps {
   onBack: () => void;
@@ -36,6 +37,10 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
       .finally(() => setSettingsLoading(false));
   }, []);
   const handleSave = async () => {
+    if (!isValidPersonName(firstname) || !isValidPersonName(lastname)) {
+      return;
+    }
+
     const profileBody = {
       firstname,
       lastname,

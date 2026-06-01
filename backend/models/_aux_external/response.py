@@ -4,6 +4,7 @@ from datetime import datetime
 from pydantic_visible_fields import VisibleFieldsModel, field
 
 from ..internal import Role, AppTheme
+from .aux import PersonName
 
 
 class UserInfoResponse(VisibleFieldsModel):
@@ -13,8 +14,8 @@ class UserInfoResponse(VisibleFieldsModel):
     role: Role | None = field(visible_to=[Role.admin], default=None)
     password: str | None = field(visible_to=[Role.admin], default=None)
 
-    firstname: str | None = field(visible_to=[Role.user], default=None)
-    lastname: str | None = field(visible_to=[Role.user], default=None)
+    firstname: PersonName | None = field(visible_to=[Role.user], default=None)
+    lastname: PersonName | None = field(visible_to=[Role.user], default=None)
 
     points: int | None = field(visible_to=[Role.observer], default=None)
     company: str | None = field(visible_to=[Role.user], default=None)
@@ -68,8 +69,8 @@ class NotificationInfoResponse(VisibleFieldsModel):
 class SignupRequestInfoResponse(VisibleFieldsModel):
     id: int | None = field(visible_to=[Role.admin], default=None)
 
-    firstname: str | None = field(visible_to=[Role.admin], default=None)
-    lastname: str | None = field(visible_to=[Role.admin], default=None)
+    firstname: PersonName | None = field(visible_to=[Role.admin], default=None)
+    lastname: PersonName | None = field(visible_to=[Role.admin], default=None)
     company: str | None = field(visible_to=[Role.admin], default=None)
 
     phone: str | None = field(visible_to=[Role.admin], default=None)

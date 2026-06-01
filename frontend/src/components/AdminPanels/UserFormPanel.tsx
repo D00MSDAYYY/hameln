@@ -3,11 +3,17 @@ import {
   Typography,
   Panel,
   Flex,
-  IconButton,
   Button,
   Input,
 } from '@maxhub/max-ui';
 import type { UserInfoResponse } from '../../api/types';
+import {
+  buildRussianPhone,
+  getPhoneTail,
+  isCompletePhoneTail,
+  PhoneInput,
+} from '../PhoneInput';
+import { isValidPersonName } from '../../utils/personName';
 
 const ROLE_OPTIONS = [
   { value: 'admin', label: 'Админ' },
@@ -26,7 +32,7 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
   const [firstname, setFirstname] = useState(initial?.firstname || '');
   const [lastname, setLastname] = useState(initial?.lastname || '');
   const [company, setCompany] = useState(initial?.company || '');
-  const [phone, setPhone] = useState(initial?.phone || '');
+  const [phone, setPhone] = useState(getPhoneTail(initial?.phone));
   const [password, setPassword] = useState(initial?.password || '');
   const [role, setRole] = useState(initial?.role || 'user');
   const [points, setPoints] = useState(String(initial?.points ?? 0));
@@ -36,14 +42,19 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
     setFirstname(initial?.firstname || '');
     setLastname(initial?.lastname || '');
     setCompany(initial?.company || '');
-    setPhone(initial?.phone || '');
+    setPhone(getPhoneTail(initial?.phone));
     setPassword(initial?.password || '');
     setRole(initial?.role || 'user');
     setPoints(String(initial?.points ?? 0));
   }, [initial]);
 
   const handleSubmit = () => {
-    if (!nickname.trim() || !firstname.trim() || !lastname.trim() || !phone.trim()) {
+    if (
+      !nickname.trim()
+      || !isValidPersonName(firstname)
+      || !isValidPersonName(lastname)
+      || !isCompletePhoneTail(phone)
+    ) {
       return;
     }
 
@@ -52,7 +63,7 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
       firstname: firstname.trim(),
       lastname: lastname.trim(),
       company: company.trim() || null,
-      phone: phone.trim() || null,
+      phone: buildRussianPhone(phone),
       role,
       points: parseInt(points, 10) || 0,
     };
@@ -111,13 +122,11 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
       </div>
 
       <div>
-        <Typography.Title variant="small-strong">Телефон</Typography.Title>
-        <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input
-            type="tel"
-            placeholder="Введите телефон"
+          <Typography.Title variant="small-strong">Телефон</Typography.Title>
+          <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
+          <PhoneInput
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={setPhone}
           />
         </Panel>
       </div>

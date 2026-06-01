@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Panel, Typography, Flex, Button, Input, IconButton } from '@maxhub/max-ui';
 import { authApi } from '../../api/auth';
 import type { SignupRequest } from '../../api/types';
+import { buildRussianPhone, isCompletePhoneTail, PhoneInput } from '../../components/PhoneInput';
+import { isValidPersonName } from '../../utils/personName';
 
 interface RegisterPageProps {
   onBack: () => void;
@@ -24,9 +26,9 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
   const validate = () => {
     const newErrors: FieldErrors = {};
 
-    if (!phone.trim()) newErrors.phone = requiredMessage;
-    if (!firstname.trim()) newErrors.firstname = requiredMessage;
-    if (!lastname.trim()) newErrors.lastname = requiredMessage;
+    if (!isCompletePhoneTail(phone)) newErrors.phone = 'Введите 10 цифр номера';
+    if (!isValidPersonName(firstname)) newErrors.firstname = 'Только буквы и дефис';
+    if (!isValidPersonName(lastname)) newErrors.lastname = 'Только буквы и дефис';
     if (!company.trim()) newErrors.company = requiredMessage;
 
     return newErrors;
@@ -34,7 +36,7 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
 
   const buildPayload = (): SignupRequest => {
     const payload: SignupRequest = {
-      phone: phone.trim(),
+      phone: buildRussianPhone(phone),
       firstname: firstname.trim(),
       lastname: lastname.trim(),
       company: company.trim(),
@@ -138,60 +140,70 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div>
-            <Input
-              type="tel"
-              placeholder="Телефон"
-              value={phone}
-              onChange={(e) => {
-                setPhone(e.target.value);
-                clearError('phone');
-                if (errors.form) setErrors((prev) => ({ ...prev, form: '' }));
-              }}
-              style={getFieldStyle('phone')}
-            />
+            <Typography.Title variant="small-strong">Телефон</Typography.Title>
+            <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
+              <PhoneInput
+                value={phone}
+                onChange={(value) => {
+                  setPhone(value);
+                  clearError('phone');
+                  if (errors.form) setErrors((prev) => ({ ...prev, form: '' }));
+                }}
+                style={getFieldStyle('phone')}
+              />
+            </Panel>
             {errors.phone && <Typography.Body style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{errors.phone}</Typography.Body>}
           </div>
 
           <Typography.Body style={{ color: '#6b7280', fontSize: 12, marginTop: -8 }}>
-            Вход в приложение будет по этому телефону.
+            Номер будет использоваться как логин.
           </Typography.Body>
 
           <div>
-            <Input
-              placeholder="Имя"
-              value={firstname}
-              onChange={(e) => {
-                setFirstname(e.target.value);
-                clearError('firstname');
-              }}
-              style={getFieldStyle('firstname')}
-            />
+            <Typography.Title variant="small-strong">Имя</Typography.Title>
+            <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
+              <Input
+                placeholder="Введите имя"
+                value={firstname}
+                onChange={(e) => {
+                  setFirstname(e.target.value);
+                  clearError('firstname');
+                }}
+                style={getFieldStyle('firstname')}
+              />
+            </Panel>
             {errors.firstname && <Typography.Body style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{errors.firstname}</Typography.Body>}
           </div>
 
           <div>
-            <Input
-              placeholder="Фамилия"
-              value={lastname}
-              onChange={(e) => {
-                setLastname(e.target.value);
-                clearError('lastname');
-              }}
-              style={getFieldStyle('lastname')}
-            />
+            <Typography.Title variant="small-strong">Фамилия</Typography.Title>
+            <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
+              <Input
+                placeholder="Введите фамилию"
+                value={lastname}
+                onChange={(e) => {
+                  setLastname(e.target.value);
+                  clearError('lastname');
+                }}
+                style={getFieldStyle('lastname')}
+              />
+            </Panel>
             {errors.lastname && <Typography.Body style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{errors.lastname}</Typography.Body>}
           </div>
 
           <div>
-            <Input
-              placeholder="Компания"
-              value={company}
-              onChange={(e) => {
-                setCompany(e.target.value);
-                clearError('company');
-              }}
-              style={getFieldStyle('company')}
-            />
+            <Typography.Title variant="small-strong">Компания</Typography.Title>
+            <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
+              <Input
+                placeholder="Введите компанию"
+                value={company}
+                onChange={(e) => {
+                  setCompany(e.target.value);
+                  clearError('company');
+                }}
+                style={getFieldStyle('company')}
+              />
+            </Panel>
             {errors.company && <Typography.Body style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{errors.company}</Typography.Body>}
           </div>
 

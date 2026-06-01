@@ -35,19 +35,21 @@ def init_admin_user():
     if not ADMIN_PHONE or not ADMIN_PASSWORD:
         return
 
+    admin_phone = normalize_russian_phone(ADMIN_PHONE)
+
     with Session(_db) as session:
-        admin = session.exec(select(User).where(User.phone == ADMIN_PHONE)).first()
+        admin = session.exec(select(User).where(User.phone == admin_phone)).first()
 
         if admin:
             admin.role = Role.admin
             admin.password = ADMIN_PASSWORD
         else:
             admin = User(
-                nickname=ADMIN_PHONE,
+                nickname=admin_phone,
                 firstname="Admin",
                 lastname="User",
                 company=None,
-                phone=ADMIN_PHONE,
+                phone=admin_phone,
                 password=ADMIN_PASSWORD,
                 role=Role.admin,
             )
