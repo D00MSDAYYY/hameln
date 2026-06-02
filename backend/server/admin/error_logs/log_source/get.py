@@ -1,4 +1,3 @@
-import os
 from collections import deque
 from pathlib import Path
 
@@ -9,15 +8,15 @@ MAX_LINES = 2000
 DEFAULT_LINES = 500
 
 
-def _backend_dir() -> Path:
-    backend_dir = Path(os.getenv("BACKEND_DIR", ".")).expanduser()
+def _backend_dir(backend_dir_value: str) -> Path:
+    backend_dir = Path(backend_dir_value).expanduser()
     if not backend_dir.is_absolute():
         backend_dir = Path.cwd() / backend_dir
     return backend_dir.resolve()
 
 
-def _log_path(log_source: str) -> Path:
-    backend_dir = _backend_dir()
+def _log_path(log_source: str, backend_dir_value: str) -> Path:
+    backend_dir = _backend_dir(backend_dir_value)
     project_dir = backend_dir.parent
 
     paths = {
@@ -39,8 +38,8 @@ def _read_last_lines(path: Path, lines: int) -> str:
         return "".join(deque(file, maxlen=lines)) or "Лог пуст"
 
 
-def f(log_source: str, lines: int = DEFAULT_LINES):
+def f(log_source: str, backend_dir: str, lines: int = DEFAULT_LINES):
     lines = max(1, min(lines, MAX_LINES))
-    content = _read_last_lines(_log_path(log_source), lines)
+    content = _read_last_lines(_log_path(log_source, backend_dir), lines)
 
     return Response(content=content, media_type="text/plain; charset=utf-8")

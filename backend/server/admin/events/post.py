@@ -1,7 +1,7 @@
 from sqlmodel import select
 
 from server.aux import event_to_response
-from models.internal import Event, Role, Tag
+from models.internal import Event, EventTagLink, Role, Tag
 
 
 def f(event_data, admin, session):

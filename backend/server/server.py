@@ -1,91 +1,63 @@
-import os
-
-from dotenv import load_dotenv
 from contextlib import asynccontextmanager
 
 import logging
-import sys, traceback
 
-traceback.print_exc(file=sys.stdout)
-
-import redis
-
-from sqlmodel import Session, create_engine, select
+from sqlmodel import Session
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, Request, Depends
 
 from server.aux import *
+from server.database import init_database
 from server.user_session_storage import UserSessionStorage
 from models.internal import *
 from models.external import *
 
-load_dotenv(".env")
-
-SESSION_TTL = int(os.getenv("SESSION_TTL", "86400"))
-VERIFICATION_CODE_TTL = int(os.getenv("VERIFICATION_CODE_TTL", "300"))
-BACKEND_DIR = str(os.getenv("BACKEND_DIR", "."))
-ADMIN_PHONE = os.getenv("ADMIN_PHONE")
-ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD")
-
-_db = create_engine(f"sqlite:///{BACKEND_DIR}/hameln.db", echo=False)
-
-
-def init_admin_user():
-    if not ADMIN_PHONE or not ADMIN_PASSWORD:
-        return
-
-    admin_phone = normalize_russian_phone(ADMIN_PHONE)
-
-    with Session(_db) as session:
-        admin = session.exec(select(User).where(User.phone == admin_phone)).first()
-
-        if admin:
-            admin.role = Role.admin
-            admin.password = ADMIN_PASSWORD
-        else:
-            admin = User(
-                nickname=admin_phone,
-                firstname="Admin",
-                lastname="User",
-                company=None,
-                phone=admin_phone,
-                password=ADMIN_PASSWORD,
-                role=Role.admin,
-            )
-            session.add(admin)
-
-        session.commit()
-
-
-def init_database():
-    SQLModel.metadata.create_all(_db)
-    init_admin_user()
-
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_database()
+    init_database(app.state.engine, app.state.settings)
     yield
 
 
-def get_db_session():
-    with Session(_db) as session:
+def configure_app(
+    app: FastAPI,
+    *,
+    settings,
+    engine,
+    session_storage: UserSessionStorage,
+    logger: logging.Logger,
+):
+    app.state.settings = settings
+    app.state.engine = engine
+    app.state.session_storage = session_storage
+    app.state.logger = logger
+    return app
+
+
+def create_app(
+    *,
+    settings,
+    engine,
+    session_storage: UserSessionStorage,
+    logger: logging.Logger,
+):
+    return configure_app(
+        server,
+        settings=settings,
+        engine=engine,
+        session_storage=session_storage,
+        logger=logger,
+    )
+
+
+def get_db_session(request: Request):
+    with Session(request.app.state.engine) as session:
         yield session
 
 
-def get_session_storage() -> UserSessionStorage:
-    redis_host = os.getenv("REDIS_HOST", "localhost")
-    redis_port = int(os.getenv("REDIS_PORT", "6379"))
-    session_ttl = int(os.getenv("SESSION_TTL", "86400"))
-
-    redis_client = redis.Redis(
-        host=redis_host,
-        port=redis_port,
-        decode_responses=True,
-    )
-    return UserSessionStorage(redis_client, session_ttl)
+def get_session_storage(request: Request) -> UserSessionStorage:
+    return request.app.state.session_storage
 
 
 server = FastAPI(
@@ -108,7 +80,15 @@ async def global_exception_handler(
     request: Request,
     exc: Exception,
 ):
-    traceback.print_exc()
+    client = request.client.host if request.client else "unknown"
+    logger = getattr(request.app.state, "logger", logging.getLogger("uvicorn.error"))
+    logger.error(
+        "Unhandled exception: %s %s from %s",
+        request.method,
+        request.url,
+        client,
+        exc_info=(type(exc), exc, exc.__traceback__),
+    )
     return JSONResponse(
         status_code=500,
         content={"detail": "Внутренняя ошибка сервера"},
@@ -617,7 +597,7 @@ async def get_admin_log(
             session_storage,
         )
     )
-    return f(log_source, lines)
+    return f(log_source, request.app.state.settings.backend_dir, lines)
 
 
 @server.get("/admin/users", response_model=List[UserInfoResponse])
