@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from models.internal import Event
-from aux import event_to_response
+from server.aux import event_to_response
 
 
 def f(event_id, user, session):

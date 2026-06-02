@@ -327,7 +327,7 @@ async def update_settings(
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
-    from user.settings.patch import f
+    from server.user.settings.patch import f
 
     return f(
         new_settings,
@@ -346,7 +346,7 @@ async def get_admin_events(
     db: Session = Depends(get_db_session),
     session_storage: UserSessionStorage = Depends(get_session_storage),
 ):
-    from admin.events.get import f
+    from server.admin.events.get import f
 
     return f(
         ensure_admin(
@@ -598,6 +598,26 @@ async def generate_report(
         ),
         db,
     )
+
+
+@server.get("/admin/logs/{log_source}", response_class=Response)
+async def get_admin_log(
+    request: Request,
+    log_source: str,
+    lines: int = 500,
+    db: Session = Depends(get_db_session),
+    session_storage: UserSessionStorage = Depends(get_session_storage),
+):
+    from server.admin.error_logs.log_source.get import f
+
+    ensure_admin(
+        get_current_user(
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
+        )
+    )
+    return f(log_source, lines)
 
 
 @server.get("/admin/users", response_model=List[UserInfoResponse])

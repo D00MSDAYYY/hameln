@@ -1,6 +1,6 @@
 from sqlmodel import select
 
-from aux import event_to_response
+from server.aux import event_to_response
 from models.internal import Event, Role
 
 

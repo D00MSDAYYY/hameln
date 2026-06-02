@@ -4,10 +4,11 @@ import EditEventsPanel from '../components/AdminPanels/EditEventsPanel';
 import ReportPanel from '../components/AdminPanels/ReportPanel';
 import EditUsersPanel from '../components/AdminPanels/EditUsersPanel';
 import SignupRequestsPanel from '../components/AdminPanels/SignupRequestsPanel';
+import ErrorLogsPanel from '../components/AdminPanels/ErrorLogsPanel';
 
 const AdminPage = () => {
   const [currentView, setCurrentView] = useState<
-    'main' | 'editEvents' | 'createReport' | 'editUsers' | 'signupRequests' | 'debugConsole'
+    'main' | 'editEvents' | 'createReport' | 'editUsers' | 'signupRequests' | 'errorLogs'
   >('main');
 
   if (currentView === 'editEvents') {
@@ -24,6 +25,10 @@ const AdminPage = () => {
 
   if (currentView === 'signupRequests') {
     return <SignupRequestsPanel onBack={() => setCurrentView('main')} />;
+  }
+
+  if (currentView === 'errorLogs') {
+    return <ErrorLogsPanel onBack={() => setCurrentView('main')} />;
   }
 
   return (
@@ -60,6 +65,11 @@ const AdminPage = () => {
               title="Заявки"
               showChevron
               onClick={() => setCurrentView('signupRequests')}
+            />
+            <CellSimple
+              title="Логи ошибок"
+              showChevron
+              onClick={() => setCurrentView('errorLogs')}
             />
           </CellList>
         </div>

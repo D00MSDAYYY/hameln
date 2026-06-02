@@ -2,7 +2,7 @@ from sqlmodel import select
 from fastapi import HTTPException
 
 from models.internal import Event, EventTagLink, Tag, Role
-from aux import event_to_response
+from server.aux import event_to_response
 
 
 def f(event_id, event_data, admin, session):

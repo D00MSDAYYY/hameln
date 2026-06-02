@@ -95,4 +95,12 @@ export const adminApi = {
       parseAs: 'blob',
     });
   },
+
+  getLog: (source: 'backend' | 'frontend', lines = 500) => {
+    const params = new URLSearchParams({ lines: String(lines) });
+
+    return apiRequest<string>(`/api/admin/logs/${source}?${params.toString()}`, {
+      parseAs: 'text',
+    });
+  },
 };
