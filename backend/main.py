@@ -1,25 +1,30 @@
 import logging
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import redis
 import uvicorn
+from fastapi import APIRouter, FastAPI, Request
+from fastapi.responses import JSONResponse
 from sqlmodel import create_engine
 
+from app import App
 from server.database.database import SqlModelDatabase
+from server.log_reader.log_reader import FileLogReader
 from server.report.report import (
     DefaultReportService,
     ExcelReportRenderer,
     SqlModelReportRepository,
 )
-from server.log_reader.log_reader import FileLogReader
-from server.server import create_app
+from server.server import configure_router
 from server.session_storage.redis_session_storage import RedisSessionStorage
 from server.settings.settings import Settings
+from tests.test_func import insert_test_data
 
 BACKEND_DIR = Path(__file__).resolve().parent
 
 
-def build_app():
+if __name__ == "__main__":
     settings = Settings.from_env(
         env_file=str(BACKEND_DIR / ".env"),
         default_backend_dir=str(BACKEND_DIR),
@@ -35,8 +40,30 @@ def build_app():
     log_reader = FileLogReader(settings)
     report_renderer = ExcelReportRenderer()
     logger = logging.getLogger("uvicorn.error")
+    router = configure_router(APIRouter())
 
-    return create_app(
+    database.initialize()
+    insert_test_data(database)
+
+
+    async def global_exception_handler(
+        request: Request,
+        exc: Exception,
+    ):
+        client = request.client.host if request.client else "unknown"
+        logger.error(
+            "Unhandled exception: %s %s from %s",
+            request.method,
+            request.url,
+            client,
+            exc_info=(type(exc), exc, exc.__traceback__),
+        )
+        return JSONResponse(
+            status_code=500,
+            content={"detail": "Внутренняя ошибка сервера"},
+        )
+
+    app = App(
         settings=settings,
         database=database,
         session_storage=session_storage,
@@ -45,13 +72,8 @@ def build_app():
             repository=SqlModelReportRepository(session),
             renderer=report_renderer,
         ),
-        logger=logger,
+        router=router,
+        exception_handler=global_exception_handler,
     )
 
-
-app = build_app()
-
-
-if __name__ == "__main__":
-    settings = app.state.settings
     uvicorn.run(app, host=settings.host, port=settings.port)

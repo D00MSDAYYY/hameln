@@ -16,15 +16,22 @@ NC='\033[0m'
 # ---------- Parse Arguments ----------
 FORCE=false
 RESET=false
+usage() {
+    echo "Usage: ./run.sh [--force] [--reset]"
+}
+
 for arg in "$@"; do
     case $arg in
         --force)
             FORCE=true
-            shift
             ;;
         --reset)
             RESET=true
-            shift
+            ;;
+        *)
+            echo -e "${RED}Unknown argument: $arg${NC}"
+            usage
+            exit 1
             ;;
     esac
 done
@@ -37,6 +44,7 @@ FRONTEND_LOG="$FRONTEND_DIR/frontend.log"
 BACKEND_PORT=8000
 FRONTEND_PORT=5173
 REDIS_PORT=6379
+BACKEND_APP="main.py"
 
 echo -e "${GREEN}========================================${NC}"
 if [ "$FORCE" = true ]; then
@@ -189,6 +197,9 @@ if [ ! -f "main.py" ]; then
     echo -e "${RED}Error: main.py not found in $BACKEND_DIR${NC}"
     exit 1
 fi
+
+echo "  Checking backend app..."
+"$VENV_PYTHON" -m py_compile main.py
 echo ""
 
 # ---------- Frontend setup ----------
@@ -207,11 +218,11 @@ echo -e "${YELLOW}[6/8] Checking ports ($BACKEND_PORT, $FRONTEND_PORT)...${NC}"
 for port in $BACKEND_PORT $FRONTEND_PORT; do
     service_name="Backend"
     [ $port -eq $FRONTEND_PORT ] && service_name="Frontend"
-    if port_in_use $port; then
+    if port_in_use "$port"; then
         echo -e "  Port ${port} (${service_name}) is already in use."
         if [ "$FORCE" = true ]; then
             echo -e "  ${YELLOW}--force: killing process on port $port${NC}"
-            pid=$(get_pid_by_port $port)
+            pid=$(get_pid_by_port "$port")
             if [ -n "$pid" ]; then
                 kill -9 "$pid" 2>/dev/null && echo "  Killed PID $pid"
                 sleep 1
@@ -222,7 +233,7 @@ for port in $BACKEND_PORT $FRONTEND_PORT; do
             read -p "  Kill the process on port $port? (y/n): " -n 1 -r
             echo
             if [[ $REPLY =~ ^[Yy]$ ]]; then
-                pid=$(get_pid_by_port $port)
+                pid=$(get_pid_by_port "$port")
                 [ -n "$pid" ] && kill "$pid" 2>/dev/null && sleep 1
             else
                 echo -e "${RED}Port $port is busy, cannot continue.${NC}"
@@ -251,21 +262,26 @@ echo -e "  Launching backend on port $BACKEND_PORT..."
 cd "$BACKEND_DIR"
 source .venv/bin/activate
 touch "$BACKEND_LOG"
-nohup uvicorn main:app --host 0.0.0.0 --port $BACKEND_PORT > "$BACKEND_LOG" 2>&1 &
+nohup "$VENV_PYTHON" "$BACKEND_APP" > "$BACKEND_LOG" 2>&1 &
 BACKEND_PID=$!
 echo "  Backend PID: $BACKEND_PID"
 echo -n "  Waiting for backend"
 for i in {1..15}; do
-    if port_in_use $BACKEND_PORT; then
+    if ! kill -0 "$BACKEND_PID" 2>/dev/null; then
+        echo -e "\n${RED}Error: backend process exited during startup.${NC}"
+        tail -n 20 "$BACKEND_LOG"
+        exit 1
+    fi
+    if port_in_use "$BACKEND_PORT"; then
         echo -e " ${GREEN}✓ ready${NC}"
         break
     fi
     sleep 1
     echo -n "."
 done
-if ! port_in_use $BACKEND_PORT; then
+if ! port_in_use "$BACKEND_PORT"; then
     echo -e "\n${RED}Error: backend did not start within 15 seconds.${NC}"
-    tail -n 10 "$BACKEND_LOG"
+    tail -n 20 "$BACKEND_LOG"
     exit 1
 fi
 
@@ -278,16 +294,21 @@ FRONTEND_PID=$!
 echo "  Frontend PID: $FRONTEND_PID"
 echo -n "  Waiting for frontend"
 for i in {1..15}; do
-    if port_in_use $FRONTEND_PORT; then
+    if ! kill -0 "$FRONTEND_PID" 2>/dev/null; then
+        echo -e "\n${RED}Error: frontend process exited during startup.${NC}"
+        tail -n 20 "$FRONTEND_LOG"
+        exit 1
+    fi
+    if port_in_use "$FRONTEND_PORT"; then
         echo -e " ${GREEN}✓ ready${NC}"
         break
     fi
     sleep 1
     echo -n "."
 done
-if ! port_in_use $FRONTEND_PORT; then
+if ! port_in_use "$FRONTEND_PORT"; then
     echo -e "\n${RED}Error: frontend did not start within 15 seconds.${NC}"
-    tail -n 10 "$FRONTEND_LOG"
+    tail -n 20 "$FRONTEND_LOG"
     exit 1
 fi
 
