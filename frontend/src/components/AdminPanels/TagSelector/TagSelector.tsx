@@ -1,8 +1,8 @@
-// TagSelector.tsx
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { Input, Flex, Panel, Typography, IconButton, Spinner } from '@maxhub/max-ui';
+import { useState, useEffect } from 'react';
+import { Flex, Panel, Typography, IconButton, Spinner } from '@maxhub/max-ui';
 import type { TagInfoResponse } from '../../../api/types';
 import { userApi } from '../../../api/user';
+import { SearchableItemsWidget } from '../../SearchableItemsWidget';
 
 interface TagSelectorProps {
   selected: TagInfoResponse[];
@@ -10,13 +10,9 @@ interface TagSelectorProps {
 }
 
 export const TagSelector = ({ selected, onChange }: TagSelectorProps) => {
-  const [query, setQuery] = useState('');
   const [allTags, setAllTags] = useState<TagInfoResponse[]>([]);
-  const [results, setResults] = useState<TagInfoResponse[]>([]);
   const [loading, setLoading] = useState(true);
-  const inputRef = useRef<HTMLInputElement>(null);
 
-  // Загрузка всех тегов с сервера
   useEffect(() => {
     userApi
       .getTags()
@@ -31,69 +27,18 @@ export const TagSelector = ({ selected, onChange }: TagSelectorProps) => {
       });
   }, []);
 
-  // Фильтрация при вводе
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setQuery(value);
-      if (value.trim().length === 0) {
-        setResults([]);
-        return;
-      }
-      const lower = value.toLowerCase();
-      console.log('[TagSelector] allTags:', allTags);
-      const filtered = allTags.filter(
-        tag =>
-          tag.title?.toLowerCase().startsWith(lower) &&
-          !selected.some(s => s.title === tag.title)
-      );
-      console.log('[TagSelector] После фильтрации:', filtered);
-      setResults(filtered);
-    },
-    [allTags, selected]
+  const availableTags = allTags.filter(
+    tag => !selected.some(s => s.title === tag.title)
   );
 
-  // Добавление тега (существующего или созданного)
-  const addTag = useCallback(
-    (tag: TagInfoResponse) => {
-      console.log('[TagSelector] Добавляю тег:', tag);
-      if (!selected.some(s => s.title === tag.title)) {
-        onChange([...selected, tag]);
-      }
-      setQuery('');
-      setResults([]);
-      inputRef.current?.focus();
-    },
-    [selected, onChange]
-  );
-
-  // Создать новый тег, если не найден
-  const createAndAddTag = useCallback(() => {
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    console.log('[TagSelector] Enter нажат, создаю/добавляю тег:', trimmed);
-    // Ищем точное совпадение среди предложенных результатов
-    const exactMatch = results.find(
-      r => r.title?.toLowerCase() === trimmed.toLowerCase()
-    );
-    if (exactMatch) {
-      addTag(exactMatch);
-    } else {
-      addTag({ title: trimmed });
+  const addTag = (tag: TagInfoResponse) => {
+    if (!selected.some(s => s.title === tag.title)) {
+      onChange([...selected, tag]);
     }
-  }, [query, results, addTag]);
-
-  const removeTag = (tagTitle: string) => {
-    console.log('[TagSelector] Удаляю тег:', tagTitle);
-    onChange(selected.filter(t => t.title !== tagTitle));
   };
 
-  // Обработка Enter
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      createAndAddTag();
-    }
+  const removeTag = (tagTitle: string) => {
+    onChange(selected.filter(t => t.title !== tagTitle));
   };
 
   if (loading) {
@@ -102,34 +47,17 @@ export const TagSelector = ({ selected, onChange }: TagSelectorProps) => {
 
   return (
     <Flex direction="column" gap={12}>
-      {/* Поиск / добавление */}
-      <Flex direction="column" gap={8}>
-        <Input
-          mode="secondary"
-          placeholder="Введите тег..."
-          value={query}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          ref={inputRef}
-          style={{ width: '100%' }}
-        />
-        {results.length > 0 && (
-          <Flex direction="column" gap={4}>
-            {results.map(tag => (
-              <Panel
-                key={tag.title}
-                mode="secondary"
-                style={{ padding: '8px 12px', borderRadius: 8, cursor: 'pointer' }}
-                onClick={() => addTag(tag)}
-              >
-                <Typography.Body>{tag.title}</Typography.Body>
-              </Panel>
-            ))}
-          </Flex>
-        )}
-      </Flex>
+      <SearchableItemsWidget
+        items={availableTags}
+        buttonLabel="Выбрать тег"
+        title="Теги"
+        searchPlaceholder="Поиск по тегам"
+        emptyText="Все теги добавлены"
+        getItemLabel={(tag) => tag.title || 'Тег'}
+        getItemKey={(tag, index) => tag.id ?? tag.title ?? index}
+        onItemClick={addTag}
+      />
 
-      {/* Выбранные теги */}
       {selected.length > 0 ? (
         <Flex direction="column" gap={8}>
           {selected.map(tag => (

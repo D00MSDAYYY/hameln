@@ -1,5 +1,6 @@
 import { Panel, Typography, Button, Flex } from '@maxhub/max-ui';
 import type { TagInfoResponse, EventInfoResponse } from '../api/types';
+import { EventParticipantsWidget } from './EventParticipantsWidget';
 
 interface EventInfoDisplayerProps {
   event: EventInfoResponse;
@@ -128,43 +129,7 @@ export const EventInfoDisplayer = ({
         )}
 
         {isUpcoming && (
-          <div style={{ marginBottom: 16 }}>
-            <Typography.Title
-              variant="small-strong"
-              style={{ marginBottom: 8 }}
-            >
-              Уже зарегистрировались
-            </Typography.Title>
-            {registered_users && registered_users.length > 0 ? (
-              <Flex gap={8} wrap="wrap">
-                {registered_users.map((user, idx) => {
-                  const fullName = [user.firstname, user.lastname]
-                    .filter(Boolean)
-                    .join(' ');
-
-                  return (
-                    <span
-                      key={`${fullName}-${idx}`}
-                      style={{
-                        background: 'var(--background-secondary, #f0f0f0)',
-                        padding: '6px 10px',
-                        borderRadius: 8,
-                        fontSize: 14,
-                        color: 'var(--text-primary)',
-                      }}
-                    >
-                      {fullName || 'Пользователь'}
-                      {user.company ? ` · ${user.company}` : ''}
-                    </span>
-                  );
-                })}
-              </Flex>
-            ) : (
-              <Typography.Body style={{ color: 'var(--text-secondary)' }}>
-                Пока никто не зарегистрировался
-              </Typography.Body>
-            )}
-          </div>
+          <EventParticipantsWidget participants={registered_users} />
         )}
 
         {/* Кнопка регистрации / отмены */}

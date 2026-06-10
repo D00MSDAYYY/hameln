@@ -1,7 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Flex,
-  Input,
   Panel,
   Typography,
   IconButton,
@@ -9,6 +8,7 @@ import {
 } from '@maxhub/max-ui';
 import type { UserInfoResponse } from '../../api/types';
 import { adminApi } from '../../api/admin';
+import { SearchableItemsWidget } from '../SearchableItemsWidget';
 
 interface AttendantsEditorProps {
   value: UserInfoResponse[];
@@ -17,32 +17,52 @@ interface AttendantsEditorProps {
 }
 
 export const AttendantsEditor = ({ value, onChange, disabled }: AttendantsEditorProps) => {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<UserInfoResponse[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState<UserInfoResponse[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSearch = useCallback(async (q: string) => {
-    setQuery(q);
-    if (q.trim().length < 2) {
-      setResults([]);
+  useEffect(() => {
+    if (disabled) {
+      setLoading(false);
       return;
     }
-    setLoading(true);
-    try {
-      setResults(await adminApi.searchUsers(q));
-    } catch {
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+
+    adminApi
+      .getUsers()
+      .then((data) => {
+        setUsers(data || []);
+      })
+      .catch(() => {
+        setUsers([]);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [disabled]);
+
+  const availableUsers = users.filter(
+    (user) => !value.some((selectedUser) => selectedUser.id === user.id)
+  );
+
+  const getUserLabel = (user: UserInfoResponse) => {
+    const fullName = [user.firstname, user.lastname].filter(Boolean).join(' ');
+    return fullName || user.nickname || 'Пользователь';
+  };
+
+  const getUserSearchText = (user: UserInfoResponse) =>
+    [
+      user.nickname,
+      user.firstname,
+      user.lastname,
+      user.phone,
+      user.company,
+    ]
+      .filter(Boolean)
+      .join(' ');
 
   const addUser = (user: UserInfoResponse) => {
     if (!value.some((u) => u.id === user.id)) {
       onChange([...value, user]);
     }
-    setQuery('');
-    setResults([]);
   };
 
   const removeUser = (userId: number) => {
@@ -57,42 +77,30 @@ export const AttendantsEditor = ({ value, onChange, disabled }: AttendantsEditor
     );
   }
 
+  if (loading) {
+    return <Spinner size={20} />;
+  }
+
   return (
     <Flex direction="column" gap={12}>
-      {/* Поиск (сверху, на всю ширину) */}
-      <Flex direction="column" gap={8}>
-        <Input
-          mode="secondary"
-          placeholder="Поиск по нику..."
-          value={query}
-          onChange={(e) => handleSearch(e.target.value)}
-          disabled={loading}
-          style={{ width: '100%' }}
-        />
-        {loading && <Spinner size={20} />}
-        {results.length > 0 && (
-          <Flex direction="column" gap={4}>
-            {results.map((user) => (
-              <Panel
-                key={user.id}
-                mode="secondary"
-                style={{ padding: '8px 12px', borderRadius: 8, cursor: 'pointer' }}
-                onClick={() => addUser(user)}
-              >
-                <Typography.Body>{user.nickname}</Typography.Body>
-              </Panel>
-            ))}
-          </Flex>
-        )}
-      </Flex>
+      <SearchableItemsWidget
+        items={availableUsers}
+        buttonLabel="Выбрать посетителя"
+        title="Пользователи"
+        searchPlaceholder="Поиск по имени, нику или телефону"
+        emptyText="Все пользователи добавлены"
+        getItemLabel={getUserLabel}
+        getItemSearchText={getUserSearchText}
+        getItemKey={(user, index) => user.id ?? user.nickname ?? index}
+        onItemClick={addUser}
+      />
 
-      {/* Выбранные посетители (снизу) */}
       {value.length > 0 ? (
         <Flex direction="column" gap={8}>
           {value.map((user) => (
             <Panel key={user.id} mode="secondary" style={{ padding: '8px 12px', borderRadius: 8 }}>
               <Flex justify="space-between" align="center">
-                <Typography.Body>{user.nickname}</Typography.Body>
+                <Typography.Body>{getUserLabel(user)}</Typography.Body>
                 <IconButton
                   mode="tertiary"
                   size="small"
