@@ -8,15 +8,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, Response, Request, Depends
 
 from server.aux import *
-from server.database import init_database
-from server.user_session_storage import UserSessionStorage
+from server.database._database import Database
+from server.log_reader._log_reader import LogReader
+from server.report._report import ReportService
+from server.session_storage._session_storage import SessionStorage
 from models.internal import *
 from models.external import *
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    init_database(app.state.engine, app.state.settings)
+    app.state.database.initialize()
     yield
 
 
@@ -24,13 +26,17 @@ def configure_app(
     app: FastAPI,
     *,
     settings,
-    engine,
-    session_storage: UserSessionStorage,
+    database: Database,
+    session_storage: SessionStorage,
+    log_reader: LogReader,
+    report_service_factory,
     logger: logging.Logger,
 ):
     app.state.settings = settings
-    app.state.engine = engine
+    app.state.database = database
     app.state.session_storage = session_storage
+    app.state.log_reader = log_reader
+    app.state.report_service_factory = report_service_factory
     app.state.logger = logger
     return app
 
@@ -38,26 +44,40 @@ def configure_app(
 def create_app(
     *,
     settings,
-    engine,
-    session_storage: UserSessionStorage,
+    database: Database,
+    session_storage: SessionStorage,
+    log_reader: LogReader,
+    report_service_factory,
     logger: logging.Logger,
 ):
     return configure_app(
         server,
         settings=settings,
-        engine=engine,
+        database=database,
         session_storage=session_storage,
+        log_reader=log_reader,
+        report_service_factory=report_service_factory,
         logger=logger,
     )
 
 
 def get_db_session(request: Request):
-    with Session(request.app.state.engine) as session:
-        yield session
+    yield from request.app.state.database.session()
 
 
-def get_session_storage(request: Request) -> UserSessionStorage:
+def get_session_storage(request: Request) -> SessionStorage:
     return request.app.state.session_storage
+
+
+def get_log_reader(request: Request) -> LogReader:
+    return request.app.state.log_reader
+
+
+def get_report_service(
+    request: Request,
+    db: Session = Depends(get_db_session),
+) -> ReportService:
+    return request.app.state.report_service_factory(db)
 
 
 server = FastAPI(
@@ -100,7 +120,7 @@ async def signup(
     body: SignupRequest,
     db: Session = Depends(get_db_session),
 ):
-    from server.user.signup.post import f
+    from server.endpoints.user.signup.post import f
 
     return f(
         body,
@@ -113,9 +133,9 @@ async def login(
     login_data: LoginRequest,
     response: Response,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.login.post import f
+    from server.endpoints.user.login.post import f
 
     return f(login_data, response, db, session_storage)
 
@@ -124,9 +144,9 @@ async def login(
 async def logout(
     request: Request,
     response: Response,
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.logout.post import f
+    from server.endpoints.user.logout.post import f
 
     return f(request, response, session_storage)
 
@@ -135,9 +155,9 @@ async def logout(
 async def get_profile(
     request: Request,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.profile.get import f
+    from server.endpoints.user.profile.get import f
 
     return f(
         get_current_user(
@@ -153,9 +173,9 @@ async def update_profile(
     request: Request,
     profile_data: UserInfoResponse,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.profile.patch import f
+    from server.endpoints.user.profile.patch import f
 
     return f(
         profile_data,
@@ -172,9 +192,9 @@ async def update_profile(
 async def get_events(
     request: Request,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.events.get import f
+    from server.endpoints.user.events.get import f
 
     return f(
         get_current_user(
@@ -191,9 +211,9 @@ async def get_event_detail(
     request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.events.event_id.get import f
+    from server.endpoints.user.events.event_id.get import f
 
     return f(
         event_id,
@@ -211,9 +231,9 @@ async def register_for_event(
     request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.events.event_id.register.post import f
+    from server.endpoints.user.events.event_id.register.post import f
 
     return f(
         event_id,
@@ -231,9 +251,9 @@ async def unregister_from_event(
     request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.events.event_id.register.delete import f
+    from server.endpoints.user.events.event_id.register.delete import f
 
     return f(
         event_id,
@@ -250,9 +270,9 @@ async def unregister_from_event(
 async def get_tags(
     request: Request,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.tags.get import f
+    from server.endpoints.user.tags.get import f
 
     return f(
         get_current_user(
@@ -268,9 +288,9 @@ async def get_tags(
 async def get_notifications(
     request: Request,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.notifications.get import f
+    from server.endpoints.user.notifications.get import f
 
     return f(
         get_current_user(
@@ -286,9 +306,9 @@ async def get_notifications(
 async def get_settings(
     request: Request,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.settings.get import f
+    from server.endpoints.user.settings.get import f
 
     return f(
         get_current_user(
@@ -305,9 +325,9 @@ async def update_settings(
     request: Request,
     new_settings: SettingsResponse,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.user.settings.patch import f
+    from server.endpoints.user.settings.patch import f
 
     return f(
         new_settings,
@@ -324,9 +344,9 @@ async def update_settings(
 async def get_admin_events(
     request: Request,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.events.get import f
+    from server.endpoints.admin.events.get import f
 
     return f(
         ensure_admin(
@@ -345,9 +365,9 @@ async def create_event(
     request: Request,
     event_data: EventInfoResponse,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.events.post import f
+    from server.endpoints.admin.events.post import f
 
     return f(
         event_data,
@@ -368,9 +388,9 @@ async def update_event(
     event_id: int,
     event_data: EventInfoResponse,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.events.event_id.patch import f
+    from server.endpoints.admin.events.event_id.patch import f
 
     return f(
         event_id,
@@ -391,9 +411,9 @@ async def delete_event(
     request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.events.event_id.delete import f
+    from server.endpoints.admin.events.event_id.delete import f
 
     return f(
         event_id,
@@ -412,9 +432,9 @@ async def delete_event(
 async def get_signup_requests(
     request: Request,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.signup_requests.get import f
+    from server.endpoints.admin.signup_requests.get import f
 
     ensure_admin(
         get_current_user(
@@ -435,9 +455,9 @@ async def update_signup_request(
     request_id: int,
     body: SignupRequest,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.signup_requests.request_id.patch import f
+    from server.endpoints.admin.signup_requests.request_id.patch import f
 
     ensure_admin(
         get_current_user(
@@ -454,9 +474,9 @@ async def approve_signup_request(
     request: Request,
     request_id: int,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.signup_requests.request_id.approve.post import f
+    from server.endpoints.admin.signup_requests.request_id.approve.post import f
 
     ensure_admin(
         get_current_user(
@@ -473,9 +493,9 @@ async def delete_signup_request(
     request: Request,
     request_id: int,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.signup_requests.delete import f
+    from server.endpoints.admin.signup_requests.delete import f
 
     ensure_admin(
         get_current_user(
@@ -492,9 +512,9 @@ async def search_users(
     request: Request,
     q: str,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.search.get import f
+    from server.endpoints.admin.search.get import f
 
     return f(
         q,
@@ -516,9 +536,9 @@ async def get_event_attendants(
     request: Request,
     event_id: int,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.events.event_id.attendants.get import f
+    from server.endpoints.admin.events.event_id.attendants.get import f
 
     return f(
         event_id,
@@ -539,9 +559,9 @@ async def update_event_attendants(
     event_id: int,
     attendant_ids: List[int],
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.events.event_id.attendants.patch import f
+    from server.endpoints.admin.events.event_id.attendants.patch import f
 
     return f(
         event_id,
@@ -562,9 +582,10 @@ async def generate_report(
     request: Request,
     params: ReportRequest = Depends(),
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    report_service: ReportService = Depends(get_report_service),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.report.get import f
+    from server.endpoints.admin.report.get import f
 
     return f(
         params.date_from,
@@ -576,7 +597,7 @@ async def generate_report(
                 session_storage,
             )
         ),
-        db,
+        report_service,
     )
 
 
@@ -586,9 +607,10 @@ async def get_admin_log(
     log_source: str,
     lines: int = 500,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    log_reader: LogReader = Depends(get_log_reader),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.error_logs.log_source.get import f
+    from server.endpoints.admin.error_logs.log_source.get import f
 
     ensure_admin(
         get_current_user(
@@ -597,16 +619,16 @@ async def get_admin_log(
             session_storage,
         )
     )
-    return f(log_source, request.app.state.settings.backend_dir, lines)
+    return f(log_source, log_reader, lines)
 
 
 @server.get("/admin/users", response_model=List[UserInfoResponse])
 async def get_all_users(
     request: Request,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.users.get import f
+    from server.endpoints.admin.users.get import f
 
     return f(
         ensure_admin(
@@ -625,9 +647,9 @@ async def create_user(
     request: Request,
     user_data: UserRequest,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.users.post import f
+    from server.endpoints.admin.users.post import f
 
     return f(
         user_data,
@@ -648,9 +670,9 @@ async def update_user(
     user_id: int,
     user_data: UserRequest,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.users.user_id.patch import f
+    from server.endpoints.admin.users.user_id.patch import f
 
     return f(
         user_id,
@@ -671,9 +693,9 @@ async def delete_user(
     request: Request,
     user_id: int,
     db: Session = Depends(get_db_session),
-    session_storage: UserSessionStorage = Depends(get_session_storage),
+    session_storage: SessionStorage = Depends(get_session_storage),
 ):
-    from server.admin.users.user_id.delete import f
+    from server.endpoints.admin.users.user_id.delete import f
 
     return f(
         user_id,

@@ -60,7 +60,7 @@ class User(UserBase, table=True):
 
 
 class SignUpRequest(UserBase, table=True):
-    pass
+    nickname: str
 
 
 class Notification(SQLModel, table=True):

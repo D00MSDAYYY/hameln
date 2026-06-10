@@ -14,7 +14,17 @@ export const EventInfoDisplayer = ({
   onRegister,
   onUnregister,
 }: EventInfoDisplayerProps) => {
-  const { title, description, date, tags, points, is_registered, link } = event;
+  const {
+    title,
+    description,
+    date,
+    tags,
+    points,
+    is_registered,
+    link,
+    registered_users,
+  } = event;
+  const isUpcoming = date ? new Date(date).getTime() > Date.now() : false;
 
   const formattedDate = new Date(date).toLocaleString('ru-RU', {
     weekday: 'short',
@@ -115,6 +125,46 @@ export const EventInfoDisplayer = ({
               🔗 Ссылка на мероприятие
             </Button>
           </a>
+        )}
+
+        {isUpcoming && (
+          <div style={{ marginBottom: 16 }}>
+            <Typography.Title
+              variant="small-strong"
+              style={{ marginBottom: 8 }}
+            >
+              Уже зарегистрировались
+            </Typography.Title>
+            {registered_users && registered_users.length > 0 ? (
+              <Flex gap={8} wrap="wrap">
+                {registered_users.map((user, idx) => {
+                  const fullName = [user.firstname, user.lastname]
+                    .filter(Boolean)
+                    .join(' ');
+
+                  return (
+                    <span
+                      key={`${fullName}-${idx}`}
+                      style={{
+                        background: 'var(--background-secondary, #f0f0f0)',
+                        padding: '6px 10px',
+                        borderRadius: 8,
+                        fontSize: 14,
+                        color: 'var(--text-primary)',
+                      }}
+                    >
+                      {fullName || 'Пользователь'}
+                      {user.company ? ` · ${user.company}` : ''}
+                    </span>
+                  );
+                })}
+              </Flex>
+            ) : (
+              <Typography.Body style={{ color: 'var(--text-secondary)' }}>
+                Пока никто не зарегистрировался
+              </Typography.Body>
+            )}
+          </div>
         )}
 
         {/* Кнопка регистрации / отмены */}

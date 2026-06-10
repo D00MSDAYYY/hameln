@@ -18,11 +18,17 @@ export interface EventInfoResponse {
   link?: string | null;
   is_archived?: boolean | null;
   is_registered?: boolean | null;
+  registered_users?: EventRegistrantResponse[] | null;
   created_at?: string | null;
 }
 export interface TagInfoResponse {
   id?: number | null;
   title?: string | null;
+}
+export interface EventRegistrantResponse {
+  firstname?: string | null;
+  lastname?: string | null;
+  company?: string | null;
 }
 export interface LoginRequest {
   phone: string;
@@ -44,6 +50,7 @@ export interface SettingsResponse {
   do_notify?: boolean | null;
 }
 export interface SignupRequest {
+  nickname: string;
   phone: string;
   firstname: string;
   lastname: string;
@@ -51,6 +58,7 @@ export interface SignupRequest {
 }
 export interface SignupRequestInfoResponse {
   id?: number | null;
+  nickname?: string | null;
   firstname?: string | null;
   lastname?: string | null;
   company?: string | null;

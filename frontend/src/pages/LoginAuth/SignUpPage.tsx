@@ -15,6 +15,7 @@ type FieldErrors = Partial<Record<keyof SignupRequest | 'form', string>>;
 const requiredMessage = 'Обязательное поле';
 
 export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
+  const [nickname, setNickname] = useState('');
   const [phone, setPhone] = useState('');
   const [firstname, setFirstname] = useState('');
   const [lastname, setLastname] = useState('');
@@ -26,6 +27,7 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
   const validate = () => {
     const newErrors: FieldErrors = {};
 
+    if (!nickname.trim()) newErrors.nickname = requiredMessage;
     if (!isCompletePhoneTail(phone)) newErrors.phone = 'Введите 10 цифр номера';
     if (!isValidPersonName(firstname)) newErrors.firstname = 'Только буквы и дефис';
     if (!isValidPersonName(lastname)) newErrors.lastname = 'Только буквы и дефис';
@@ -36,6 +38,7 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
 
   const buildPayload = (): SignupRequest => {
     const payload: SignupRequest = {
+      nickname: nickname.trim(),
       phone: buildRussianPhone(phone),
       firstname: firstname.trim(),
       lastname: lastname.trim(),
@@ -139,6 +142,23 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
         </Flex>
 
         <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div>
+            <Typography.Title variant="small-strong">Ник</Typography.Title>
+            <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
+              <Input
+                placeholder="Введите ник"
+                value={nickname}
+                onChange={(e) => {
+                  setNickname(e.target.value);
+                  clearError('nickname');
+                  if (errors.form) setErrors((prev) => ({ ...prev, form: '' }));
+                }}
+                style={getFieldStyle('nickname')}
+              />
+            </Panel>
+            {errors.nickname && <Typography.Body style={{ color: '#d32f2f', fontSize: 12, marginTop: 4 }}>{errors.nickname}</Typography.Body>}
+          </div>
+
           <div>
             <Typography.Title variant="small-strong">Телефон</Typography.Title>
             <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>

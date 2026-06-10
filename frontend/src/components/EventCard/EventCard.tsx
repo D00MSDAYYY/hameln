@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Panel, Typography, Flex } from '@maxhub/max-ui';
-import styles from './EventCard.module.scss';
+import styles from './EventCard.module.css';
 import type { TagInfoResponse, EventInfoResponse } from '../../api/types';
 
 interface EventCardProps {
@@ -16,7 +16,7 @@ export const EventCard = ({
   onRegisterSwapped,
   onUnregisterSwapped,
 }: EventCardProps) => {
-  const { title, tags, is_registered, points, date } = eventInfo;
+  const { title, description, tags, is_registered, points, date } = eventInfo;
 
   const SWIPE_THRESHOLD = 80;   
   const SWIPE_FACTOR = 0.015;      
@@ -146,6 +146,11 @@ export const EventCard = ({
               <span className={styles.pointsValue}>🏆 {points}</span>
             </div>
           </div>
+          {description && (
+            <Typography.Body className={styles.description}>
+              {description}
+            </Typography.Body>
+          )}
           <Flex gap={8} wrap="wrap" style={{ marginTop: 8 }}>
             {tags && tags.map((tag: TagInfoResponse, idx) => (
               <span key={idx} style={{

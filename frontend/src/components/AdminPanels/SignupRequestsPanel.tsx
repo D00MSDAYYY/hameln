@@ -30,11 +30,13 @@ interface SignupRequestFormProps {
 }
 
 const buildPayload = ({
+  nickname,
   phone,
   firstname,
   lastname,
   company,
 }: SignupRequestInfoResponse): SignupRequest => ({
+  nickname: nickname?.trim() || '',
   phone: buildRussianPhone(phone || ''),
   firstname: firstname?.trim() || '',
   lastname: lastname?.trim() || '',
@@ -42,6 +44,7 @@ const buildPayload = ({
 });
 
 const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps) => {
+  const [nickname, setNickname] = useState(initial.nickname || '');
   const [phone, setPhone] = useState(getPhoneTail(initial.phone));
   const [firstname, setFirstname] = useState(initial.firstname || '');
   const [lastname, setLastname] = useState(initial.lastname || '');
@@ -50,6 +53,7 @@ const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps
 
   const handleSubmit = () => {
     const payload = buildPayload({
+      nickname,
       phone,
       firstname,
       lastname,
@@ -61,7 +65,7 @@ const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps
       return;
     }
 
-    if (!isValidPersonName(payload.firstname) || !isValidPersonName(payload.lastname) || !payload.company) {
+    if (!payload.nickname || !isValidPersonName(payload.firstname) || !isValidPersonName(payload.lastname) || !payload.company) {
       setError('Заполните обязательные поля');
       return;
     }
@@ -72,6 +76,17 @@ const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div>
+        <Typography.Title variant="small-strong">Ник</Typography.Title>
+        <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
+          <Input
+            placeholder="Введите ник"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+          />
+        </Panel>
+      </div>
+
       <div>
         <Typography.Title variant="small-strong">Телефон</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
@@ -296,9 +311,9 @@ const SignupRequestsPanel = ({ onBack }: SignupRequestsPanelProps) => {
                 >
                   <Flex justify="space-between" align="center">
                     <Flex direction="column" gap={2}>
-                      <Typography.Body>{title}</Typography.Body>
+                      <Typography.Body>{request.nickname ? `@${request.nickname}` : title}</Typography.Body>
                       <Typography.Body variant="small" style={{ color: 'var(--text-secondary)' }}>
-                        {contact || 'Контакт не указан'} · {request.company || 'Без компании'}
+                        {title} · {contact || 'Контакт не указан'} · {request.company || 'Без компании'}
                       </Typography.Body>
                     </Flex>
                     <Flex direction="column" gap={4}>

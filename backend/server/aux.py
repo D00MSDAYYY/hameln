@@ -2,7 +2,7 @@ from pydantic_visible_fields import visible_fields_response
 from fastapi import HTTPException, Cookie, Request
 from sqlmodel import Session, select
 
-from server.user_session_storage import UserSessionStorage
+from server.session_storage._session_storage import SessionStorage
 from models.internal import *
 from models.external import *
 
@@ -14,7 +14,7 @@ def get_session_id_from_cookie(request: Request):
 def get_current_user(
     session_id,
     session,
-    user_sessions_storage: UserSessionStorage,
+    user_sessions_storage: SessionStorage,
 ) -> User:
     if not session_id:
         raise HTTPException(status_code=401, detail="Not authenticated")
@@ -45,6 +45,7 @@ def event_to_response(
     role: Role,
     user_id: int | None = None,
     session: Session | None = None,
+    include_registered_users: bool = False,
 ):
     data = visible_fields_response(event, role=role)
 
@@ -73,5 +74,21 @@ def event_to_response(
             )
         ).first()
         update_dict["is_registered"] = registration is not None
+
+    if include_registered_users and session:
+        registered_users = session.exec(
+            select(User)
+            .join(Registration, Registration.user_id == User.id)
+            .where(Registration.event_id == event.id)
+            .order_by(User.lastname, User.firstname)
+        ).all()
+        update_dict["registered_users"] = [
+            EventRegistrantResponse(
+                firstname=user.firstname,
+                lastname=user.lastname,
+                company=user.company,
+            )
+            for user in registered_users
+        ]
 
     return EventInfoResponse(**update_dict)

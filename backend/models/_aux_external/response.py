@@ -37,6 +37,12 @@ class TagInfoResponse(VisibleFieldsModel):
     title: str | None = field(visible_to=[Role.observer], default=None)
 
 
+class EventRegistrantResponse(VisibleFieldsModel):
+    firstname: PersonName | None = field(visible_to=[Role.user], default=None)
+    lastname: PersonName | None = field(visible_to=[Role.user], default=None)
+    company: str | None = field(visible_to=[Role.user], default=None)
+
+
 class EventInfoResponse(VisibleFieldsModel):
     id: int | None = field(visible_to=[Role.admin], default=None)
 
@@ -53,6 +59,9 @@ class EventInfoResponse(VisibleFieldsModel):
 
     is_archived: bool | None = field(visible_to=[Role.admin], default=None)
     is_registered: bool | None = field(visible_to=[Role.user], default=None)
+    registered_users: List["EventRegistrantResponse"] | None = field(
+        visible_to=[Role.user], default=None
+    )
 
     created_at: datetime | None = field(visible_to=[Role.admin], default=None)
 
@@ -69,6 +78,7 @@ class NotificationInfoResponse(VisibleFieldsModel):
 class SignupRequestInfoResponse(VisibleFieldsModel):
     id: int | None = field(visible_to=[Role.admin], default=None)
 
+    nickname: str | None = field(visible_to=[Role.admin], default=None)
     firstname: PersonName | None = field(visible_to=[Role.admin], default=None)
     lastname: PersonName | None = field(visible_to=[Role.admin], default=None)
     company: str | None = field(visible_to=[Role.admin], default=None)
