@@ -16,4 +16,4 @@ def f(q, admin, session):
 
     users = session.exec(statement).all()
 
-    return [user_to_response(u, role=admin.role) for u in users]
+    return [user_to_response(u, role=admin.role, session=session) for u in users]

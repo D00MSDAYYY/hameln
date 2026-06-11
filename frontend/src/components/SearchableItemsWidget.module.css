@@ -47,6 +47,11 @@
   line-height: 1;
 }
 
+.searchPanel {
+  padding: 16px;
+  border-radius: 12px;
+}
+
 .content {
   min-height: 120px;
   overflow-y: auto;

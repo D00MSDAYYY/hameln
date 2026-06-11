@@ -1,6 +1,6 @@
 from sqlmodel import select
 from fastapi import HTTPException
-from server.aux import user_to_response
+from server.aux import get_or_create_company, user_to_response
 
 
 from models.internal import Role, User
@@ -40,6 +40,7 @@ def f(user_data, admin, session):
         )
 
     create_dict = normalize_create_dict(user_data)
+    company = get_or_create_company(session, create_dict.pop("company", None))
 
     existing_phone = session.exec(select(User).where(User.phone == create_dict["phone"])).first()
     if existing_phone:
@@ -49,10 +50,11 @@ def f(user_data, admin, session):
 
     new_user = User(
         **create_dict,
+        company_id=company.id if company else None,
         role=Role(user_data.role) if user_data.role else Role.user,
     )
     session.add(new_user)
     session.commit()
     session.refresh(new_user)
 
-    return user_to_response(new_user, role=admin.role)
+    return user_to_response(new_user, role=admin.role, session=session)

@@ -1,6 +1,6 @@
 from sqlmodel import select
 
-from test import TEST_EVENTS, TEST_PASSWORD, TEST_USERS, insert_test_data
+from tests.test_func import TEST_EVENTS, TEST_PASSWORD, TEST_USERS, insert_test_data
 from server.database.database import SqlModelDatabase
 from server.settings.settings import Settings
 from models.internal import Event, Registration, User

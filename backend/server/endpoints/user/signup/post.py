@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from sqlmodel import Session, select
 
+from server.aux import get_or_create_company
 from models.internal import User, SignUpRequest
 from models.external import SignupRequest
 
@@ -40,12 +41,14 @@ def f(
             status_code=409, detail="Заявка с таким ником уже существует"
         )
 
+    company = get_or_create_company(db, body.company)
+
     signup_req = SignUpRequest(
         nickname=body.nickname,
         phone=body.phone,
         firstname=body.firstname,
         lastname=body.lastname,
-        company=body.company,
+        company_id=company.id if company else None,
     )
     db.add(signup_req)
     db.commit()

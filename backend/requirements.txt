@@ -11,3 +11,4 @@ pydantic-to-typescript
 pytest
 pytest-cov
 httpx
+dadata

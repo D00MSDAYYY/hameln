@@ -35,9 +35,54 @@ def ensure_admin(user):
     return user
 
 
-def user_to_response(user: User, role: Role):
+def normalize_company_name(name: str | None) -> str | None:
+    if not name:
+        return None
+
+    normalized = " ".join(name.split()).strip()
+    return normalized or None
+
+
+def get_or_create_company(session: Session, company_name: str | None) -> Company | None:
+    name = normalize_company_name(company_name)
+    if not name:
+        return None
+
+    company = session.exec(select(Company).where(Company.name == name)).first()
+    if company:
+        return company
+
+    company = Company(name=name)
+    session.add(company)
+    session.flush()
+    return company
+
+
+def get_company_name(session: Session | None, company_id: int | None) -> str | None:
+    if not session or company_id is None:
+        return None
+
+    company = session.get(Company, company_id)
+    return company.name if company else None
+
+
+def user_to_response(user: User, role: Role, session: Session | None = None):
     data = UserInfoResponse.model_validate(user, from_attributes=True)
-    return visible_fields_response(data, role=role)
+    response = visible_fields_response(data, role=role)
+    if role in (Role.user, Role.admin):
+        response.company = get_company_name(session, user.company_id)
+    return response
+
+
+def signup_request_to_response(
+    signup_request: SignUpRequest,
+    role: Role,
+    session: Session | None = None,
+):
+    data = SignupRequestInfoResponse.model_validate(signup_request, from_attributes=True)
+    response = visible_fields_response(data, role=role)
+    response.company = get_company_name(session, signup_request.company_id)
+    return response
 
 
 def event_to_response(
@@ -86,7 +131,7 @@ def event_to_response(
             EventRegistrantResponse(
                 firstname=user.firstname,
                 lastname=user.lastname,
-                company=user.company,
+                company=get_company_name(session, user.company_id),
             )
             for user in registered_users
         ]

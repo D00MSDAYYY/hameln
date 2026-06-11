@@ -1,14 +1,14 @@
 import logging
-from contextlib import asynccontextmanager
 from pathlib import Path
 
 import redis
 import uvicorn
-from fastapi import APIRouter, FastAPI, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from sqlmodel import create_engine
 
 from app import App
+from server.company_suggest.dadata_company_suggest import DadataCompanySuggest
 from server.database.database import SqlModelDatabase
 from server.log_reader.log_reader import FileLogReader
 from server.report.report import (
@@ -38,6 +38,9 @@ if __name__ == "__main__":
     )
     session_storage = RedisSessionStorage(redis_client, settings.session_ttl)
     log_reader = FileLogReader(settings)
+    company_suggest = DadataCompanySuggest(
+        token=settings.dadata_token,
+    )
     report_renderer = ExcelReportRenderer()
     logger = logging.getLogger("uvicorn.error")
     router = configure_router(APIRouter())
@@ -68,6 +71,7 @@ if __name__ == "__main__":
         database=database,
         session_storage=session_storage,
         log_reader=log_reader,
+        company_suggest=company_suggest,
         report_service_factory=lambda session: DefaultReportService(
             repository=SqlModelReportRepository(session),
             renderer=report_renderer,

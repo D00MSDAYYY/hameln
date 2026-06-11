@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from sqlmodel import Session, select
 
 from models.internal import (
+    Company,
     Event,
     EventTagLink,
     Registration,
@@ -124,6 +125,7 @@ def insert_test_data(
 
 def upsert_test_user(session: Session, seed: TestUserSeed, password: str) -> User:
     user = session.exec(select(User).where(User.nickname == seed.nickname)).first()
+    company = get_or_create_test_company(session, seed.company)
 
     if not user:
         user = User(
@@ -131,7 +133,7 @@ def upsert_test_user(session: Session, seed: TestUserSeed, password: str) -> Use
             phone=seed.phone,
             firstname=seed.firstname,
             lastname=seed.lastname,
-            company=seed.company,
+            company_id=company.id if company else None,
             password=password,
             points=seed.points,
             role=Role.user,
@@ -142,7 +144,7 @@ def upsert_test_user(session: Session, seed: TestUserSeed, password: str) -> Use
         user.phone = seed.phone
         user.firstname = seed.firstname
         user.lastname = seed.lastname
-        user.company = seed.company
+        user.company_id = company.id if company else None
         user.password = password
         user.points = seed.points
         user.role = Role.user
@@ -152,6 +154,20 @@ def upsert_test_user(session: Session, seed: TestUserSeed, password: str) -> Use
         session.add(UserSettingsLink(user_id=user.id))
 
     return user
+
+
+def get_or_create_test_company(session: Session, company_name: str) -> Company | None:
+    company_name = " ".join(company_name.split()).strip()
+    if not company_name:
+        return None
+
+    company = session.exec(select(Company).where(Company.name == company_name)).first()
+    if not company:
+        company = Company(name=company_name)
+        session.add(company)
+        session.flush()
+
+    return company
 
 
 def upsert_test_event(

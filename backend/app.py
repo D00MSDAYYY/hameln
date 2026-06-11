@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session
 from starlette.responses import Response
 
+from server.company_suggest._company_suggest import CompanySuggest
 from server.database._database import Database
 from server.log_reader._log_reader import LogReader
 from server.report._report import ReportService
@@ -26,6 +27,7 @@ class App(FastAPI):
         database: Database,
         session_storage: SessionStorage,
         log_reader: LogReader,
+        company_suggest: CompanySuggest,
         report_service_factory: ReportServiceFactory,
         router: APIRouter,
         exception_handler: ExceptionHandler,
@@ -39,6 +41,7 @@ class App(FastAPI):
         self.state.database = database
         self.state.session_storage = session_storage
         self.state.log_reader = log_reader
+        self.state.company_suggest = company_suggest
         self.state.report_service_factory = report_service_factory
 
         self.add_middleware(

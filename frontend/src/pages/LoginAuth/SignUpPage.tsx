@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Panel, Typography, Flex, Button, Input, IconButton } from '@maxhub/max-ui';
 import { authApi } from '../../api/auth';
 import type { SignupRequest } from '../../api/types';
+import { CompanyInput } from '../../components/CompanyInput';
 import { buildRussianPhone, isCompletePhoneTail, PhoneInput } from '../../components/PhoneInput';
 import { isValidPersonName } from '../../utils/personName';
 
@@ -214,11 +215,11 @@ export const SignUpPage = ({ onBack, onSubmitted }: RegisterPageProps) => {
           <div>
             <Typography.Title variant="small-strong">Компания</Typography.Title>
             <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-              <Input
+              <CompanyInput
                 placeholder="Введите компанию"
                 value={company}
-                onChange={(e) => {
-                  setCompany(e.target.value);
+                onChange={(value) => {
+                  setCompany(value);
                   clearError('company');
                 }}
                 style={getFieldStyle('company')}

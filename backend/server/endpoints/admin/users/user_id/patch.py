@@ -1,6 +1,6 @@
 from sqlmodel import select
 from fastapi import HTTPException
-from server.aux import user_to_response
+from server.aux import get_or_create_company, user_to_response
 
 
 from models.internal import User, Role
@@ -34,6 +34,9 @@ def f(user_id, user_data, admin, session):
     update_dict = normalize_update_dict(
         user_data.model_dump(exclude_unset=True, exclude={"id", "created_at"})
     )
+    if "company" in update_dict:
+        company = get_or_create_company(session, update_dict.pop("company"))
+        user.company_id = company.id if company else None
 
     # Проверяем уникальность никнейма, если он меняется
     if "nickname" in update_dict and update_dict["nickname"] != user.nickname:
@@ -64,4 +67,4 @@ def f(user_id, user_data, admin, session):
     session.commit()
     session.refresh(user)
 
-    return user_to_response(user, role=admin.role)
+    return user_to_response(user, role=admin.role, session=session)

@@ -37,13 +37,21 @@ class Settings(BaseModel):
     do_notify: bool = Field(default=True)
 
 
+class Company(SQLModel, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(unique=True, index=True)
+    inn: str | None = Field(default=None, index=True)
+    address: str | None = Field(default=None)
+    # TODO: decide how to handle companies that are no longer referenced.
+
+
 class UserBase(SQLModel):
     id: int | None = Field(default=None, primary_key=True)
 
     firstname: str
     lastname: str
 
-    company: str | None = Field(default=None)
+    company_id: int | None = Field(default=None, foreign_key="company.id", index=True)
 
     phone: str = Field(unique=True, index=True)
 

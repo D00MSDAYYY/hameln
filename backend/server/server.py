@@ -2,6 +2,7 @@ from sqlmodel import Session
 from fastapi import APIRouter, Response, Request, Depends
 
 from server.aux import *
+from server.company_suggest._company_suggest import CompanySuggest
 from server.log_reader._log_reader import LogReader
 from server.report._report import ReportService
 from server.session_storage._session_storage import SessionStorage
@@ -21,6 +22,10 @@ def get_log_reader(request: Request) -> LogReader:
     return request.app.state.log_reader
 
 
+def get_company_suggest(request: Request) -> CompanySuggest:
+    return request.app.state.company_suggest
+
+
 def get_report_service(
     request: Request,
     db: Session = Depends(get_db_session),
@@ -30,6 +35,14 @@ def get_report_service(
 
 
 def configure_router(router: APIRouter) -> APIRouter:
+    @router.get("/companies/suggest", response_model=List[CompanySuggestionResponse])
+    async def suggest_companies(
+        q: str,
+        company_suggest: CompanySuggest = Depends(get_company_suggest),
+    ):
+        return company_suggest.suggest(q)
+
+
     @router.post("/user/signup", response_model=SignupResponse)
     async def signup(
         body: SignupRequest,
@@ -79,7 +92,8 @@ def configure_router(router: APIRouter) -> APIRouter:
                 get_session_id_from_cookie(request),
                 db,
                 session_storage,
-            )
+            ),
+            db,
         )
 
 

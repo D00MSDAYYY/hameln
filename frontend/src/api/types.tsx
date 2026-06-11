@@ -8,6 +8,11 @@
 export type AppTheme = "dark" | "light";
 export type Role = "admin" | "user" | "observer";
 
+export interface CompanySuggestionResponse {
+  name: string;
+  inn?: string | null;
+  address?: string | null;
+}
 export interface EventInfoResponse {
   id?: number | null;
   title?: string | null;

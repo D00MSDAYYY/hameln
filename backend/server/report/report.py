@@ -15,6 +15,7 @@ from models.internal import (
     Registration,
     Tag,
     User,
+    Company,
 )
 
 
@@ -107,6 +108,13 @@ class ExcelReportRenderer(ReportRenderer):
                         max_length = max(max_length, len(str(cell.value)))
                 ws.column_dimensions[column_letter].width = min(max_length + 2, 40)
 
+        def company_name(user: User) -> str | None:
+            if user.company_id is None:
+                return None
+
+            company = self._session.get(Company, user.company_id)
+            return company.name if company else None
+
         ws_users = wb.active
         ws_users.title = "Пользователи"
         style_header(
@@ -131,7 +139,7 @@ class ExcelReportRenderer(ReportRenderer):
             ws_users.cell(row=row_num, column=5, value=user.phone)
             ws_users.cell(row=row_num, column=6, value=user.role.value)
             ws_users.cell(row=row_num, column=7, value=user.points)
-            ws_users.cell(row=row_num, column=8, value=user.company)
+            ws_users.cell(row=row_num, column=8, value=company_name(user))
             ws_users.cell(
                 row=row_num,
                 column=9,

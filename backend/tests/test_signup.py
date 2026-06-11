@@ -3,7 +3,7 @@ from fastapi import HTTPException
 from sqlmodel import select
 
 from models.external import SignupRequest
-from models.internal import SignUpRequest, User
+from models.internal import Company, SignUpRequest, User
 from server.endpoints.user.signup.post import f as signup
 
 
@@ -26,6 +26,9 @@ def test_signup_creates_registration_request(db_session):
     assert signup_request.nickname == "ivan"
     assert signup_request.phone == "+79990001122"
     assert signup_request.firstname == "Иван"
+    company = db_session.get(Company, signup_request.company_id)
+    assert company is not None
+    assert company.name == "Test"
 
 
 def test_signup_rejects_existing_user(db_session, user_factory):
@@ -39,13 +42,16 @@ def test_signup_rejects_existing_user(db_session, user_factory):
 
 
 def test_signup_rejects_existing_request(db_session):
+    company = Company(name="Test")
+    db_session.add(company)
+    db_session.flush()
     db_session.add(
         SignUpRequest(
             nickname="ivan",
             phone="+79990001122",
             firstname="Иван",
             lastname="Иванов",
-            company="Test",
+            company_id=company.id,
         )
     )
     db_session.commit()

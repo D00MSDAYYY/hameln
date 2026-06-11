@@ -1,8 +1,8 @@
 import pytest
 from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, SQLModel, create_engine, select
 
-from models.internal import User
+from models.internal import Company, User
 
 
 class FakeSessionStorage:
@@ -50,11 +50,20 @@ def fake_session_storage():
 @pytest.fixture
 def user_factory(db_session):
     def create_user(**overrides):
+        company_name = overrides.pop("company", "Test")
+        company = db_session.exec(
+            select(Company).where(Company.name == company_name)
+        ).first()
+        if not company:
+            company = Company(name=company_name)
+            db_session.add(company)
+            db_session.flush()
+
         data = {
             "nickname": "+79990000000",
             "firstname": "Иван",
             "lastname": "Иванов",
-            "company": "Test",
+            "company_id": company.id,
             "phone": "+79990000000",
             "password": "secret",
         }

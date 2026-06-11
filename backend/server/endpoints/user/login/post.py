@@ -37,4 +37,4 @@ def f(
         max_age=user_sessions_storage.session_ttl,
     )
 
-    return user_to_response(user, role=user.role)
+    return user_to_response(user, role=user.role, session=db_session)

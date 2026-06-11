@@ -22,4 +22,4 @@ def f(event_id, admin, session):
         User.id.in_(attendant_ids)  # type: ignore[attr-defined]
     )
     users = session.exec(statement).all()
-    return [user_to_response(u, role=admin.role) for u in users]
+    return [user_to_response(u, role=admin.role, session=session) for u in users]

@@ -1,6 +1,6 @@
 from models.internal import SignUpRequest
-from pydantic_visible_fields import visible_fields_response
 from models.internal import Role
+from server.aux import signup_request_to_response
 from sqlmodel import Session, select
 
 
@@ -8,4 +8,7 @@ def f(
     db: Session,
 ):
     requests = db.exec(select(SignUpRequest)).all()
-    return [visible_fields_response(request, role=Role.admin) for request in requests]
+    return [
+        signup_request_to_response(request, role=Role.admin, session=db)
+        for request in requests
+    ]

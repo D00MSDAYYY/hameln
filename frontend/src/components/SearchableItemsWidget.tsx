@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { Button, IconButton, Input, Typography } from '@maxhub/max-ui';
+import { Button, IconButton, Input, Panel, Typography } from '@maxhub/max-ui';
 import styles from './SearchableItemsWidget.module.css';
 
 interface SearchableItemsWidgetProps<T> {
@@ -79,11 +79,13 @@ export function SearchableItemsWidget<T>({
               </IconButton>
             </div>
 
-            <Input
-              placeholder={searchPlaceholder}
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
+            <Panel mode="secondary" className={styles.searchPanel}>
+              <Input
+                placeholder={searchPlaceholder}
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+            </Panel>
 
             <div className={styles.content}>
               {filteredItems.length > 0 ? (

@@ -7,6 +7,7 @@ import {
   Input,
 } from '@maxhub/max-ui';
 import type { UserInfoResponse } from '../../api/types';
+import { CompanyInput } from '../CompanyInput';
 import {
   buildRussianPhone,
   getPhoneTail,
@@ -113,10 +114,10 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
       <div>
         <Typography.Title variant="small-strong">Компания</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input
+          <CompanyInput
             placeholder="Введите компанию"
             value={company}
-            onChange={(e) => setCompany(e.target.value)}
+            onChange={setCompany}
           />
         </Panel>
       </div>

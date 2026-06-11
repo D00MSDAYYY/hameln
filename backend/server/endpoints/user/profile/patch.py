@@ -1,4 +1,4 @@
-from server.aux import user_to_response
+from server.aux import get_or_create_company, user_to_response
 
 
 def f(profile_data, user, session):
@@ -6,6 +6,10 @@ def f(profile_data, user, session):
         exclude_unset=True,
         exclude={"id", "role", "created_at"},
     )
+    if "company" in data:
+        company = get_or_create_company(session, data.pop("company"))
+        user.company_id = company.id if company else None
+
     for field, value in data.items():
         if hasattr(user, field):
             setattr(user, field, value)
@@ -14,4 +18,4 @@ def f(profile_data, user, session):
     session.commit()
     session.refresh(user)
 
-    return user_to_response(user, role=user.role)
+    return user_to_response(user, role=user.role, session=session)

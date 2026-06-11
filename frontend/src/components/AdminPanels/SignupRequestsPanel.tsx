@@ -9,6 +9,7 @@ import {
 } from '@maxhub/max-ui';
 import { adminApi } from '../../api/admin';
 import type { SignupRequest, SignupRequestInfoResponse } from '../../api/types';
+import { CompanyInput } from '../CompanyInput';
 import {
   buildRussianPhone,
   getPhoneTail,
@@ -122,10 +123,10 @@ const SignupRequestForm = ({ initial, onCancel, onSave }: SignupRequestFormProps
       <div>
         <Typography.Title variant="small-strong">Компания</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input
+          <CompanyInput
             placeholder="Введите компанию"
             value={company}
-            onChange={(e) => setCompany(e.target.value)}
+            onChange={setCompany}
           />
         </Panel>
       </div>

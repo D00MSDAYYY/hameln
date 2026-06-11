@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Typography, Panel, Switch, Input, IconButton, Flex, Button } from '@maxhub/max-ui';
 import type { UserInfoResponse } from '../api/types';
 import { userApi } from '../api/user';
+import { CompanyInput } from './CompanyInput';
 import { isValidPersonName } from '../utils/personName';
 
 interface SettingsPanelProps {
@@ -134,10 +135,10 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
               <div>
                 <Typography.Title variant="small-strong">Компания</Typography.Title>
                 <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-                  <Input
+                  <CompanyInput
                     placeholder="Введите название компании"
                     value={company}
-                    onChange={(e) => setCompany(e.target.value)}
+                    onChange={setCompany}
                   />
                 </Panel>
               </div>
@@ -146,6 +147,7 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
             <Typography.Body>Загрузка настроек...</Typography.Body>
           ) : (
             <>
+              {/*
               <div>
                 <Typography.Title variant="small-strong">Оформление</Typography.Title>
                 <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
@@ -172,6 +174,7 @@ export const SettingsPanel = ({ onBack, user }: SettingsPanelProps) => {
                   </Flex>
                 </Panel>
               </div>
+              */}
               <div>
                 <Typography.Title variant="small-strong">Уведомления</Typography.Title>
                 <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12, display: 'flex', flexDirection: 'column', gap: 12 }}>

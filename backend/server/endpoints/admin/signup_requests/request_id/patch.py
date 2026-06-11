@@ -2,7 +2,8 @@ from fastapi import HTTPException
 from sqlmodel import Session, select
 
 from models.external import SignupRequest
-from models.internal import SignUpRequest, User
+from models.internal import Role, SignUpRequest, User
+from server.aux import get_or_create_company, signup_request_to_response
 
 
 def f(
@@ -54,10 +55,11 @@ def f(
     signup_req.phone = body.phone
     signup_req.firstname = body.firstname
     signup_req.lastname = body.lastname
-    signup_req.company = body.company
+    company = get_or_create_company(db, body.company)
+    signup_req.company_id = company.id if company else None
 
     db.add(signup_req)
     db.commit()
     db.refresh(signup_req)
 
-    return signup_req
+    return signup_request_to_response(signup_req, role=Role.admin, session=db)

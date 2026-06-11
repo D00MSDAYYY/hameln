@@ -6,4 +6,4 @@ from models.internal import User
 
 def f(admin, session):
     users = session.exec(select(User)).all()
-    return [user_to_response(u, role=admin.role) for u in users]
+    return [user_to_response(u, role=admin.role, session=session) for u in users]

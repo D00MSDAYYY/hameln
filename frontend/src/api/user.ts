@@ -1,5 +1,6 @@
 import { apiRequest } from './client';
 import type {
+  CompanySuggestionResponse,
   EventInfoResponse,
   NotificationInfoResponse,
   SettingsResponse,
@@ -51,4 +52,12 @@ export const userApi = {
     }),
 
   getTags: () => apiRequest<TagInfoResponse[]>('/api/user/tags'),
+
+  suggestCompanies: (query: string) => {
+    const params = new URLSearchParams({ q: query });
+
+    return apiRequest<CompanySuggestionResponse[]>(
+      `/api/companies/suggest?${params.toString()}`
+    );
+  },
 };

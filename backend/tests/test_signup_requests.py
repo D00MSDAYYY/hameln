@@ -1,16 +1,19 @@
 from sqlmodel import select
 
-from models.internal import SignUpRequest, User, UserSettingsLink
+from models.internal import Company, SignUpRequest, User, UserSettingsLink
 from server.endpoints.admin.signup_requests.request_id.approve.post import f as approve_signup_request
 
 
 def test_approve_signup_request_creates_user_and_deletes_request(db_session, monkeypatch):
+    company = Company(name="Test")
+    db_session.add(company)
+    db_session.flush()
     signup_request = SignUpRequest(
         nickname="ivan",
         phone="+79990001122",
         firstname="Иван",
         lastname="Иванов",
-        company="Test",
+        company_id=company.id,
     )
     db_session.add(signup_request)
     db_session.commit()
@@ -28,6 +31,7 @@ def test_approve_signup_request_creates_user_and_deletes_request(db_session, mon
 
     assert result["message"] == "Пользователь ivan создан. Пароль: generated-password"
     assert user.nickname == "ivan"
+    assert user.company_id == company.id
     assert user.password == "generated-password"
     assert db_session.get(SignUpRequest, signup_request.id) is None
     assert settings is not None

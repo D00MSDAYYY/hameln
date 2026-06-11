@@ -90,3 +90,9 @@ class SignupRequestInfoResponse(VisibleFieldsModel):
 
 class SignupResponse(VisibleFieldsModel):
     message: str = field(visible_to=[Role.observer])
+
+
+class CompanySuggestionResponse(VisibleFieldsModel):
+    name: str = field(visible_to=[Role.observer])
+    inn: str | None = field(visible_to=[Role.observer], default=None)
+    address: str | None = field(visible_to=[Role.observer], default=None)

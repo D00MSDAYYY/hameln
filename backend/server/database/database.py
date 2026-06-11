@@ -1,11 +1,15 @@
 from collections.abc import Iterator
 
+from sqlalchemy import inspect, text
 from sqlmodel import Session, SQLModel, select
 
-from models.internal import Role, User
+from models.internal import Company, Role, User
 from models._aux_external.aux import normalize_russian_phone
 from ._database import Database
 from server.settings.settings import Settings
+
+
+ADMIN_NICKNAME = "admin"
 
 
 class SqlModelDatabase(Database):
@@ -15,6 +19,7 @@ class SqlModelDatabase(Database):
 
     def initialize(self) -> None:
         SQLModel.metadata.create_all(self._engine)
+        self._migrate_companies()
         self._init_admin_user()
 
     def session(self) -> Iterator[Session]:
@@ -31,18 +36,79 @@ class SqlModelDatabase(Database):
             admin = session.exec(select(User).where(User.phone == admin_phone)).first()
 
             if admin:
+                admin.nickname = ADMIN_NICKNAME
                 admin.role = Role.admin
                 admin.password = self._settings.admin_password
             else:
                 admin = User(
-                    nickname=admin_phone,
+                    nickname=ADMIN_NICKNAME,
                     firstname="Admin",
                     lastname="User",
-                    company=None,
+                    company_id=None,
                     phone=admin_phone,
                     password=self._settings.admin_password,
                     role=Role.admin,
                 )
                 session.add(admin)
+
+            session.commit()
+
+    def _migrate_companies(self) -> None:
+        inspector = inspect(self._engine)
+        table_names = set(inspector.get_table_names())
+        if "company" not in table_names:
+            return
+
+        for table_name in ("user", "signuprequest"):
+            if table_name not in table_names:
+                continue
+
+            columns = {column["name"] for column in inspector.get_columns(table_name)}
+            if "company_id" not in columns:
+                with self._engine.begin() as connection:
+                    connection.execute(
+                        text(f"ALTER TABLE {table_name} ADD COLUMN company_id INTEGER")
+                    )
+
+            if "company" in columns:
+                self._migrate_company_values(table_name)
+
+    def _migrate_company_values(self, table_name: str) -> None:
+        with Session(self._engine) as session:
+            rows = session.exec(
+                text(
+                    f"""
+                    SELECT id, company
+                    FROM {table_name}
+                    WHERE company IS NOT NULL
+                      AND trim(company) != ''
+                      AND company_id IS NULL
+                    """
+                )
+            ).all()
+
+            for row in rows:
+                row_id = row[0]
+                company_name = " ".join(str(row[1]).split()).strip()
+                if not company_name:
+                    continue
+
+                company = session.exec(
+                    select(Company).where(Company.name == company_name)
+                ).first()
+                if not company:
+                    company = Company(name=company_name)
+                    session.add(company)
+                    session.flush()
+
+                session.exec(
+                    text(
+                        f"""
+                        UPDATE {table_name}
+                        SET company_id = :company_id
+                        WHERE id = :row_id
+                        """
+                    ).bindparams(company_id=company.id, row_id=row_id)
+                )
 
             session.commit()

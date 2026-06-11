@@ -13,6 +13,7 @@ class Settings:
     verification_code_ttl: int = 300
     admin_phone: str | None = None
     admin_password: str | None = None
+    dadata_token: str | None = None
     host: str = "0.0.0.0"
     port: int = 8000
 
@@ -28,6 +29,7 @@ class Settings:
             verification_code_ttl=int(os.getenv("VERIFICATION_CODE_TTL", "300")),
             admin_phone=os.getenv("ADMIN_PHONE"),
             admin_password=os.getenv("ADMIN_PASSWORD"),
+            dadata_token=os.getenv("DADATA_TOKEN"),
             host=os.getenv("HOST", "0.0.0.0"),
             port=int(os.getenv("PORT", "8000")),
         )
