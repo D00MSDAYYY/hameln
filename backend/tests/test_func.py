@@ -20,8 +20,7 @@ TEST_PASSWORD = "test123"
 
 
 @dataclass(frozen=True)
-class TestUserSeed:
-    nickname: str
+class UserSeed:
     phone: str
     firstname: str
     lastname: str
@@ -30,7 +29,7 @@ class TestUserSeed:
 
 
 @dataclass(frozen=True)
-class TestEventSeed:
+class EventSeed:
     title: str
     description: str
     points: int
@@ -39,26 +38,23 @@ class TestEventSeed:
 
 
 TEST_USERS = (
-    TestUserSeed(
-        nickname="test_anna",
+    UserSeed(
         phone="+79000000001",
-        firstname="Анна",
+        firstname="[TEST] Анна",
         lastname="Смирнова",
         company="Test Lab",
         points=120,
     ),
-    TestUserSeed(
-        nickname="test_ivan",
+    UserSeed(
         phone="+79000000002",
-        firstname="Иван",
+        firstname="[TEST] Иван",
         lastname="Петров",
         company="Demo Corp",
         points=80,
     ),
-    TestUserSeed(
-        nickname="test_maria",
+    UserSeed(
         phone="+79000000003",
-        firstname="Мария",
+        firstname="[TEST] Мария",
         lastname="Кузнецова",
         company="Example Team",
         points=45,
@@ -67,21 +63,21 @@ TEST_USERS = (
 
 
 TEST_EVENTS = (
-    TestEventSeed(
+    EventSeed(
         title="[TEST] Встреча команды",
         description="Короткая тестовая встреча для проверки регистрации и списка участников.",
         points=10,
         starts_in_days=2,
         tags=("test", "team"),
     ),
-    TestEventSeed(
+    EventSeed(
         title="[TEST] Воркшоп по продукту",
         description="Тестовое мероприятие с описанием, тегами и несколькими участниками.",
         points=25,
         starts_in_days=7,
         tags=("test", "workshop"),
     ),
-    TestEventSeed(
+    EventSeed(
         title="[TEST] Демонстрация функциональности",
         description="Сценарий для быстрой проверки карточек, регистрации и детальной страницы.",
         points=15,
@@ -93,8 +89,8 @@ TEST_EVENTS = (
 
 def insert_test_data(
     database: Database,
-    users_seed: tuple[TestUserSeed, ...] = TEST_USERS,
-    events_seed: tuple[TestEventSeed, ...] = TEST_EVENTS,
+    users_seed: tuple[UserSeed, ...] = TEST_USERS,
+    events_seed: tuple[EventSeed, ...] = TEST_EVENTS,
     *,
     password: str = TEST_PASSWORD,
     base_date: datetime | None = None,
@@ -123,13 +119,12 @@ def insert_test_data(
     }
 
 
-def upsert_test_user(session: Session, seed: TestUserSeed, password: str) -> User:
-    user = session.exec(select(User).where(User.nickname == seed.nickname)).first()
+def upsert_test_user(session: Session, seed: UserSeed, password: str) -> User:
+    user = session.exec(select(User).where(User.phone == seed.phone)).first()
     company = get_or_create_test_company(session, seed.company)
 
     if not user:
         user = User(
-            nickname=seed.nickname,
             phone=seed.phone,
             firstname=seed.firstname,
             lastname=seed.lastname,
@@ -172,7 +167,7 @@ def get_or_create_test_company(session: Session, company_name: str) -> Company |
 
 def upsert_test_event(
     session: Session,
-    seed: TestEventSeed,
+    seed: EventSeed,
     base_date: datetime,
 ) -> Event:
     event = session.exec(select(Event).where(Event.title == seed.title)).first()

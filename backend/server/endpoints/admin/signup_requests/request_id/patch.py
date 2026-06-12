@@ -21,14 +21,6 @@ def f(
             status_code=409, detail="Пользователь с таким телефоном уже существует"
         )
 
-    existing_nickname_user = db.exec(
-        select(User).where(User.nickname == body.nickname)
-    ).first()
-    if existing_nickname_user:
-        raise HTTPException(
-            status_code=409, detail="Пользователь с таким ником уже существует"
-        )
-
     existing_request = db.exec(
         select(SignUpRequest).where(
             SignUpRequest.phone == body.phone,
@@ -40,18 +32,6 @@ def f(
             status_code=409, detail="Заявка с таким телефоном уже существует"
         )
 
-    existing_nickname_request = db.exec(
-        select(SignUpRequest).where(
-            SignUpRequest.nickname == body.nickname,
-            SignUpRequest.id != request_id,
-        )
-    ).first()
-    if existing_nickname_request:
-        raise HTTPException(
-            status_code=409, detail="Заявка с таким ником уже существует"
-        )
-
-    signup_req.nickname = body.nickname
     signup_req.phone = body.phone
     signup_req.firstname = body.firstname
     signup_req.lastname = body.lastname

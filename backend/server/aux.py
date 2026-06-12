@@ -66,11 +66,14 @@ def get_company_name(session: Session | None, company_id: int | None) -> str | N
     return company.name if company else None
 
 
+def user_display_name(user: User | SignUpRequest) -> str:
+    return f"{user.firstname} {user.lastname}".strip()
+
+
 def user_to_response(user: User, role: Role, session: Session | None = None):
     data = UserInfoResponse.model_validate(user, from_attributes=True)
     response = visible_fields_response(data, role=role)
-    if role in (Role.user, Role.admin):
-        response.company = get_company_name(session, user.company_id)
+    response.company = get_company_name(session, user.company_id)
     return response
 
 

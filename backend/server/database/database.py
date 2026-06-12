@@ -9,9 +9,6 @@ from ._database import Database
 from server.settings.settings import Settings
 
 
-ADMIN_NICKNAME = "admin"
-
-
 class SqlModelDatabase(Database):
     def __init__(self, engine, settings: Settings) -> None:
         self._engine = engine
@@ -20,6 +17,7 @@ class SqlModelDatabase(Database):
     def initialize(self) -> None:
         SQLModel.metadata.create_all(self._engine)
         self._migrate_companies()
+        self._migrate_remove_nickname_columns()
         self._init_admin_user()
 
     def session(self) -> Iterator[Session]:
@@ -36,12 +34,12 @@ class SqlModelDatabase(Database):
             admin = session.exec(select(User).where(User.phone == admin_phone)).first()
 
             if admin:
-                admin.nickname = ADMIN_NICKNAME
+                admin.firstname = "Admin"
+                admin.lastname = "User"
                 admin.role = Role.admin
                 admin.password = self._settings.admin_password
             else:
                 admin = User(
-                    nickname=ADMIN_NICKNAME,
                     firstname="Admin",
                     lastname="User",
                     company_id=None,
@@ -52,6 +50,50 @@ class SqlModelDatabase(Database):
                 session.add(admin)
 
             session.commit()
+
+    def _migrate_remove_nickname_columns(self) -> None:
+        inspector = inspect(self._engine)
+        table_names = set(inspector.get_table_names())
+
+        for table_name in ("user", "signuprequest"):
+            if table_name not in table_names:
+                continue
+
+            columns = {column["name"] for column in inspector.get_columns(table_name)}
+            if "nickname" not in columns:
+                continue
+
+            self._rebuild_table_without_column(table_name, "nickname")
+
+    def _rebuild_table_without_column(self, table_name: str, removed_column: str) -> None:
+        table = SQLModel.metadata.tables[table_name]
+        old_table_name = f"{table_name}_old"
+
+        with self._engine.begin() as connection:
+            connection.execute(text("PRAGMA foreign_keys=OFF"))
+            connection.execute(text(f"DROP TABLE IF EXISTS {old_table_name}"))
+            connection.execute(text(f"ALTER TABLE {table_name} RENAME TO {old_table_name}"))
+            table.create(bind=connection)
+
+            current_columns = [column.name for column in table.columns]
+            copied_columns = [
+                column
+                for column in current_columns
+                if column != removed_column
+            ]
+            columns_sql = ", ".join(copied_columns)
+
+            connection.execute(
+                text(
+                    f"""
+                    INSERT INTO {table_name} ({columns_sql})
+                    SELECT {columns_sql}
+                    FROM {old_table_name}
+                    """
+                )
+            )
+            connection.execute(text(f"DROP TABLE {old_table_name}"))
+            connection.execute(text("PRAGMA foreign_keys=ON"))
 
     def _migrate_companies(self) -> None:
         inspector = inspect(self._engine)

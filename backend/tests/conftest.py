@@ -33,7 +33,8 @@ def engine():
         poolclass=StaticPool,
     )
     SQLModel.metadata.create_all(engine)
-    return engine
+    yield engine
+    engine.dispose()
 
 
 @pytest.fixture
@@ -60,7 +61,6 @@ def user_factory(db_session):
             db_session.flush()
 
         data = {
-            "nickname": "+79990000000",
             "firstname": "Иван",
             "lastname": "Иванов",
             "company_id": company.id,

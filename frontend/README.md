@@ -1,16 +1,92 @@
-# React + Vite
+# Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite приложение для Event Manager.
 
-Currently, two official plugins are available:
+## Структура
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```text
+src/api/                      # API-клиенты и автогенерируемые типы
+src/components/               # общие компоненты
+src/components/AdminPanels/   # панели администратора
+src/pages/                    # страницы приложения
+src/utils/                    # frontend-утилиты
+```
 
-## React Compiler
+## API
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Запросы к backend должны идти через функции в `src/api/`.
 
-## Expanding the ESLint configuration
+```text
+src/api/client.ts
+src/api/auth.ts
+src/api/user.ts
+src/api/admin.ts
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Прямые `fetch` из компонентов не используются.
+
+## Типы
+
+Файл:
+
+```text
+src/api/types.tsx
+```
+
+генерируется из backend-моделей и не редактируется вручную.
+
+Генерация запускается из корня проекта:
+
+```bash
+PATH="$PWD/backend/.venv/bin:$PATH" \
+./sh/generate_ts.sh \
+  "$PWD/backend/models/external.py" \
+  "$PWD/frontend/src/api/types.tsx"
+```
+
+## Компоненты
+
+`CompanyInput`
+
+Поле ввода компании с подсказками через backend endpoint Dadata suggest.
+
+```text
+src/components/CompanyInput.tsx
+```
+
+`SearchableItemsWidget`
+
+Общий модальный виджет для просмотра и поиска коллекций. Используется для участников, тегов и выбора посетителей.
+
+```text
+src/components/SearchableItemsWidget.tsx
+```
+
+`EventParticipantsWidget`
+
+Адаптер над `SearchableItemsWidget` для списка участников мероприятия.
+
+```text
+src/components/EventParticipantsWidget.tsx
+```
+
+## Запуск
+
+Обычно frontend запускается через корневой скрипт:
+
+```bash
+../run.sh
+```
+
+Отдельный запуск:
+
+```bash
+npm install
+npm run dev
+```
+
+## Проверка сборки
+
+```bash
+npm run build
+```

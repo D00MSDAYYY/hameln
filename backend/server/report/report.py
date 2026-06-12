@@ -9,13 +9,13 @@ from sqlmodel import Session, select
 from ._report import ReportData, ReportRenderer, ReportRepository, ReportService
 from models.internal import (
     Attendance,
+    Company,
     Event,
     EventTagLink,
     Notification,
     Registration,
     Tag,
     User,
-    Company,
 )
 
 
@@ -70,6 +70,16 @@ class SqlModelReportRepository(ReportRepository):
                 Notification.created_at <= dt_to,
             )
         ).all()
+        company_ids = {
+            user.company_id
+            for user in users
+            if user.company_id is not None
+        }
+        companies = (
+            self._session.exec(select(Company).where(Company.id.in_(company_ids))).all()
+            if company_ids
+            else []
+        )
 
         return ReportData(
             users=list(users),
@@ -78,6 +88,11 @@ class SqlModelReportRepository(ReportRepository):
             registrations=list(registrations),
             attendances=list(attendances),
             notifications=list(notifications),
+            company_names_by_id={
+                company.id: company.name
+                for company in companies
+                if company.id is not None
+            },
         )
 
 
@@ -112,8 +127,7 @@ class ExcelReportRenderer(ReportRenderer):
             if user.company_id is None:
                 return None
 
-            company = self._session.get(Company, user.company_id)
-            return company.name if company else None
+            return data.company_names_by_id.get(user.company_id)
 
         ws_users = wb.active
         ws_users.title = "Пользователи"
@@ -121,7 +135,7 @@ class ExcelReportRenderer(ReportRenderer):
             ws_users,
             [
                 "ID",
-                "Никнейм",
+                "ФИО",
                 "Имя",
                 "Фамилия",
                 "Телефон",
@@ -133,7 +147,7 @@ class ExcelReportRenderer(ReportRenderer):
         )
         for row_num, user in enumerate(data.users, 2):
             ws_users.cell(row=row_num, column=1, value=user.id)
-            ws_users.cell(row=row_num, column=2, value=user.nickname)
+            ws_users.cell(row=row_num, column=2, value=f"{user.firstname} {user.lastname}".strip())
             ws_users.cell(row=row_num, column=3, value=user.firstname)
             ws_users.cell(row=row_num, column=4, value=user.lastname)
             ws_users.cell(row=row_num, column=5, value=user.phone)
@@ -187,11 +201,11 @@ class ExcelReportRenderer(ReportRenderer):
         ws_regs = wb.create_sheet("Регистрации")
         style_header(
             ws_regs,
-            ["ID пользователя", "Никнейм", "ID события", "Название события", "Дата регистрации"],
+            ["ID пользователя", "ФИО", "ID события", "Название события", "Дата регистрации"],
         )
         for row_num, (reg, user, event) in enumerate(data.registrations, 2):
             ws_regs.cell(row=row_num, column=1, value=user.id)
-            ws_regs.cell(row=row_num, column=2, value=user.nickname)
+            ws_regs.cell(row=row_num, column=2, value=f"{user.firstname} {user.lastname}".strip())
             ws_regs.cell(row=row_num, column=3, value=event.id)
             ws_regs.cell(row=row_num, column=4, value=event.title)
             ws_regs.cell(
@@ -204,11 +218,11 @@ class ExcelReportRenderer(ReportRenderer):
         ws_att = wb.create_sheet("Посетители")
         style_header(
             ws_att,
-            ["ID пользователя", "Никнейм", "ID события", "Название события", "Дата отметки"],
+            ["ID пользователя", "ФИО", "ID события", "Название события", "Дата отметки"],
         )
         for row_num, (att, user, event) in enumerate(data.attendances, 2):
             ws_att.cell(row=row_num, column=1, value=user.id)
-            ws_att.cell(row=row_num, column=2, value=user.nickname)
+            ws_att.cell(row=row_num, column=2, value=f"{user.firstname} {user.lastname}".strip())
             ws_att.cell(row=row_num, column=3, value=event.id)
             ws_att.cell(row=row_num, column=4, value=event.title)
             ws_att.cell(

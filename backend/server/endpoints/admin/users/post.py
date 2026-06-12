@@ -6,7 +6,7 @@ from server.aux import get_or_create_company, user_to_response
 from models.internal import Role, User
 
 
-REQUIRED_STRING_FIELDS = {"nickname", "firstname", "lastname", "phone", "password"}
+REQUIRED_STRING_FIELDS = {"firstname", "lastname", "phone", "password"}
 
 
 def normalize_create_dict(user_data):
@@ -31,14 +31,6 @@ def normalize_create_dict(user_data):
 
 
 def f(user_data, admin, session):
-    existing = session.exec(
-        select(User).where(User.nickname == user_data.nickname)
-    ).first()
-    if existing:
-        raise HTTPException(
-            status_code=400, detail="Пользователь с таким никнеймом уже существует"
-        )
-
     create_dict = normalize_create_dict(user_data)
     company = get_or_create_company(session, create_dict.pop("company", None))
 

@@ -55,20 +55,19 @@ class UserBase(SQLModel):
 
     phone: str = Field(unique=True, index=True)
 
-    created_at: datetime = Field(
+    created_at: datetime | None = Field(
         sa_column_kwargs={"server_default": func.now()}, default=None
     )
 
 
 class User(UserBase, table=True):
     role: Role = Field(default=Role.user)
-    nickname: str
     password: str
     points: int = Field(default=0)
 
 
 class SignUpRequest(UserBase, table=True):
-    nickname: str
+    pass
 
 
 class Notification(SQLModel, table=True):

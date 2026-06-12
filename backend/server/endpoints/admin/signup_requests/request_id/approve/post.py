@@ -4,6 +4,7 @@ from models.internal import SignUpRequest
 from sqlmodel import Session, select
 from fastapi import HTTPException
 from models.internal import User, Role, UserSettingsLink
+from server.aux import user_display_name
 
 
 def f(
@@ -20,15 +21,7 @@ def f(
             status_code=400, detail="Пользователь с таким телефоном уже существует"
         )
 
-    existing_nickname = db.exec(
-        select(User).where(User.nickname == signup_req.nickname)
-    ).first()
-    if existing_nickname:
-        raise HTTPException(
-            status_code=400, detail="Пользователь с таким ником уже существует"
-        )
-
-    nickname = signup_req.nickname
+    display_name = user_display_name(signup_req)
     password = secrets.token_urlsafe(9)
 
     new_user = User(
@@ -44,4 +37,4 @@ def f(
 
     db.delete(signup_req)
     db.commit()
-    return {"message": f"Пользователь {nickname} создан. Пароль: {password}"}
+    return {"message": f"Пользователь {display_name} создан. Пароль: {password}"}

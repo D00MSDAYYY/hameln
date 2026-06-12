@@ -9,7 +9,6 @@ def test_approve_signup_request_creates_user_and_deletes_request(db_session, mon
     db_session.add(company)
     db_session.flush()
     signup_request = SignUpRequest(
-        nickname="ivan",
         phone="+79990001122",
         firstname="Иван",
         lastname="Иванов",
@@ -29,8 +28,9 @@ def test_approve_signup_request_creates_user_and_deletes_request(db_session, mon
     user = db_session.exec(select(User).where(User.phone == "+79990001122")).one()
     settings = db_session.get(UserSettingsLink, user.id)
 
-    assert result["message"] == "Пользователь ivan создан. Пароль: generated-password"
-    assert user.nickname == "ivan"
+    assert result["message"] == "Пользователь Иван Иванов создан. Пароль: generated-password"
+    assert user.firstname == "Иван"
+    assert user.lastname == "Иванов"
     assert user.company_id == company.id
     assert user.password == "generated-password"
     assert db_session.get(SignUpRequest, signup_request.id) is None

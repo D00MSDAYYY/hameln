@@ -3,6 +3,7 @@ from fastapi import HTTPException
 
 
 from models.internal import User, Registration, Attendance, UserSettingsLink
+from server.aux import user_display_name
 
 
 
@@ -30,4 +31,4 @@ def f(user_id, admin, session):
     session.delete(user)
     session.commit()
 
-    return {"message": f"Пользователь {user.nickname} удалён"}
+    return {"message": f"Пользователь {user_display_name(user)} удалён"}

@@ -29,7 +29,6 @@ interface UserFormPanelProps {
 }
 
 const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
-  const [nickname, setNickname] = useState(initial?.nickname || '');
   const [firstname, setFirstname] = useState(initial?.firstname || '');
   const [lastname, setLastname] = useState(initial?.lastname || '');
   const [company, setCompany] = useState(initial?.company || '');
@@ -39,7 +38,6 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
   const [points, setPoints] = useState(String(initial?.points ?? 0));
 
   useEffect(() => {
-    setNickname(initial?.nickname || '');
     setFirstname(initial?.firstname || '');
     setLastname(initial?.lastname || '');
     setCompany(initial?.company || '');
@@ -51,8 +49,7 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
 
   const handleSubmit = () => {
     if (
-      !nickname.trim()
-      || !isValidPersonName(firstname)
+      !isValidPersonName(firstname)
       || !isValidPersonName(lastname)
       || !isCompletePhoneTail(phone)
     ) {
@@ -60,7 +57,6 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
     }
 
     const body: Record<string, any> = {
-      nickname: nickname.trim(),
       firstname: firstname.trim(),
       lastname: lastname.trim(),
       company: company.trim() || null,
@@ -78,17 +74,6 @@ const UserFormPanel = ({ initial, onSave, onCancel }: UserFormPanelProps) => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div>
-        <Typography.Title variant="small-strong">Никнейм</Typography.Title>
-        <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>
-          <Input
-            placeholder="Введите никнейм"
-            value={nickname}
-            onChange={(e) => setNickname(e.target.value)}
-          />
-        </Panel>
-      </div>
-
       <div>
         <Typography.Title variant="small-strong">Имя</Typography.Title>
         <Panel mode="secondary" style={{ padding: 16, borderRadius: 12, marginTop: 12 }}>

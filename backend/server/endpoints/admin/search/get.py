@@ -10,9 +10,12 @@ def f(q, admin, session):
         return []
 
     search_term = f"%{q.strip().lower()}%"
-    statement = (
-        select(User).where(func.lower(User.nickname).like(search_term)).limit(20)
-    )
+    raw_search_term = f"%{q.strip()}%"
+    statement = select(User).where(
+        User.firstname.like(raw_search_term)
+        | User.lastname.like(raw_search_term)
+        | func.lower(User.phone).like(search_term)
+    ).limit(20)
 
     users = session.exec(statement).all()
 

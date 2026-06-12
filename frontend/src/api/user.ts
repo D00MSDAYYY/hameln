@@ -53,6 +53,8 @@ export const userApi = {
 
   getTags: () => apiRequest<TagInfoResponse[]>('/api/user/tags'),
 
+  getLeaderboard: () => apiRequest<UserInfoResponse[]>('/api/user/leaderboard'),
+
   suggestCompanies: (query: string) => {
     const params = new URLSearchParams({ q: query });
 

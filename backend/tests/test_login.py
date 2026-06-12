@@ -6,7 +6,7 @@ from server.endpoints.user.login.post import f as login
 
 
 def test_login_sets_cookie_and_saves_session(db_session, fake_session_storage, user_factory):
-    user = user_factory(phone="+79990001122", nickname="+79990001122", password="secret")
+    user = user_factory(phone="+79990001122", password="secret")
     response = Response()
 
     result = login(
@@ -22,7 +22,7 @@ def test_login_sets_cookie_and_saves_session(db_session, fake_session_storage, u
 
 
 def test_login_rejects_wrong_password(db_session, fake_session_storage, user_factory):
-    user_factory(phone="+79990001122", nickname="+79990001122", password="secret")
+    user_factory(phone="+79990001122", password="secret")
 
     with pytest.raises(HTTPException) as exc:
         login(

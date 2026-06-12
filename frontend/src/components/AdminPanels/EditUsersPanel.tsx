@@ -141,7 +141,7 @@ const EditUsersPanel = ({ onBack }: { onBack: () => void }) => {
                                             {user.firstname} {user.lastname}
                                         </Typography.Body>
                                         <Typography.Body variant="small" style={{ color: 'var(--text-secondary)' }}>
-                                            @{user.nickname} · {user.role} · {user.company || 'Без компании'}
+                                            {user.role} · {user.company || 'Без компании'}
                                         </Typography.Body>
                                     </Flex>
                                     <Flex direction="column" gap={4}>
@@ -159,7 +159,7 @@ const EditUsersPanel = ({ onBack }: { onBack: () => void }) => {
                                         <Button
                                             mode="tertiary"
                                             size="small"
-                                            onClick={() => user.id && handleDelete(user.id, user.nickname || '')}
+                                            onClick={() => user.id && handleDelete(user.id, `${user.firstname || ''} ${user.lastname || ''}`.trim())}
                                             style={{ backgroundColor: '#d32f2f', color: '#fff' }}
                                         >
                                             🗑️

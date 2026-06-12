@@ -45,12 +45,11 @@ export const AttendantsEditor = ({ value, onChange, disabled }: AttendantsEditor
 
   const getUserLabel = (user: UserInfoResponse) => {
     const fullName = [user.firstname, user.lastname].filter(Boolean).join(' ');
-    return fullName || user.nickname || 'Пользователь';
+    return fullName || 'Пользователь';
   };
 
   const getUserSearchText = (user: UserInfoResponse) =>
     [
-      user.nickname,
       user.firstname,
       user.lastname,
       user.phone,
@@ -87,11 +86,11 @@ export const AttendantsEditor = ({ value, onChange, disabled }: AttendantsEditor
         items={availableUsers}
         buttonLabel="Выбрать посетителя"
         title="Пользователи"
-        searchPlaceholder="Поиск по имени, нику или телефону"
+        searchPlaceholder="Поиск по имени или телефону"
         emptyText="Все пользователи добавлены"
         getItemLabel={getUserLabel}
         getItemSearchText={getUserSearchText}
-        getItemKey={(user, index) => user.id ?? user.nickname ?? index}
+        getItemKey={(user, index) => user.id ?? user.phone ?? index}
         onItemClick={addUser}
       />
 

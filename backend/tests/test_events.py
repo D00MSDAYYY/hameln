@@ -7,14 +7,12 @@ from server.aux import event_to_response
 def test_event_detail_includes_registered_users_without_phone(db_session, user_factory):
     current_user = user_factory(
         phone="+79990000001",
-        nickname="+79990000001",
         firstname="Анна",
         lastname="Сидорова",
         company="Alpha",
     )
     registered_user = user_factory(
         phone="+79990000002",
-        nickname="+79990000002",
         firstname="Иван",
         lastname="Петров",
         company="Beta",

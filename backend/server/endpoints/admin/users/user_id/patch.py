@@ -6,7 +6,7 @@ from server.aux import get_or_create_company, user_to_response
 from models.internal import User, Role
 
 
-REQUIRED_STRING_FIELDS = {"nickname", "firstname", "lastname", "phone"}
+REQUIRED_STRING_FIELDS = {"firstname", "lastname", "phone"}
 
 
 def normalize_update_dict(update_dict):
@@ -37,16 +37,6 @@ def f(user_id, user_data, admin, session):
     if "company" in update_dict:
         company = get_or_create_company(session, update_dict.pop("company"))
         user.company_id = company.id if company else None
-
-    # Проверяем уникальность никнейма, если он меняется
-    if "nickname" in update_dict and update_dict["nickname"] != user.nickname:
-        existing = session.exec(
-            select(User).where(User.nickname == update_dict["nickname"])
-        ).first()
-        if existing:
-            raise HTTPException(
-                status_code=400, detail="Пользователь с таким никнеймом уже существует"
-            )
 
     if "phone" in update_dict and update_dict["phone"] != user.phone:
         existing = session.exec(select(User).where(User.phone == update_dict["phone"])).first()

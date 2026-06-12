@@ -213,6 +213,22 @@ def configure_router(router: APIRouter) -> APIRouter:
         )
 
 
+    @router.get("/user/leaderboard", response_model=List[UserInfoResponse])
+    async def get_leaderboard(
+        request: Request,
+        db: Session = Depends(get_db_session),
+        session_storage: SessionStorage = Depends(get_session_storage),
+    ):
+        from server.endpoints.user.leaderboard.get import get_leaderboard
+
+        get_current_user(
+            get_session_id_from_cookie(request),
+            db,
+            session_storage,
+        )
+        return get_leaderboard(db)
+
+
     @router.get("/user/notifications", response_model=List[NotificationInfoResponse])
     async def get_notifications(
         request: Request,

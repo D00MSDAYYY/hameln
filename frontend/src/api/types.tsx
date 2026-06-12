@@ -55,7 +55,6 @@ export interface SettingsResponse {
   do_notify?: boolean | null;
 }
 export interface SignupRequest {
-  nickname: string;
   phone: string;
   firstname: string;
   lastname: string;
@@ -63,7 +62,6 @@ export interface SignupRequest {
 }
 export interface SignupRequestInfoResponse {
   id?: number | null;
-  nickname?: string | null;
   firstname?: string | null;
   lastname?: string | null;
   company?: string | null;
@@ -75,7 +73,6 @@ export interface SignupResponse {
 }
 export interface UserInfoResponse {
   id?: number | null;
-  nickname?: string | null;
   role?: Role | null;
   password?: string | null;
   firstname?: string | null;
@@ -86,7 +83,6 @@ export interface UserInfoResponse {
   created_at?: string | null;
 }
 export interface UserRequest {
-  nickname?: string | null;
   role?: string | null;
   firstname?: string | null;
   lastname?: string | null;

@@ -22,6 +22,7 @@ class ReportData:
     registrations: list[tuple[Registration, User, Event]]
     attendances: list[tuple[Attendance, User, Event]]
     notifications: list[Notification]
+    company_names_by_id: dict[int, str]
 
 
 class ReportRepository(ABC):

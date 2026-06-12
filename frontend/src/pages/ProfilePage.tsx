@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Typography, Panel, CellList, CellSimple, Flex, Button } from '@maxhub/max-ui';
 import { SettingsPanel } from '../components/SettingsPanel';
+import { LeaderboardPanel } from '../components/LeaderboardPanel';
 import { UserInfoResponse } from '../api/types';
 import { userApi } from '../api/user';
 
@@ -10,7 +11,8 @@ interface ProfilePageProps {
 }
 
 const ProfilePage = ({ user }: ProfilePageProps) => {
-  const [currentView, setCurrentView] = useState<'main' | 'settings'>('main');
+  const [currentView, setCurrentView] = useState<'main' | 'settings' | 'leaderboard'>('main');
+  const displayName = [user.firstname, user.lastname].filter(Boolean).join(' ') || 'Пользователь';
 
   const handleLogout = async () => {
     try {
@@ -29,7 +31,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
         <Flex justify="space-between" align="center" style={{ marginBottom: 16, padding: '0 4px' }}>
           <Flex align="center" gap={12}>
             <Typography.Body style={{ fontSize: 16, fontWeight: 500 }}>
-              @{user.nickname}
+              {displayName}
             </Typography.Body>
           </Flex>
           <div style={{
@@ -61,6 +63,7 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
           <div style={{ flex: 1, overflowY: 'auto' }}>
             <CellList>
               <CellSimple title="Настройки" showChevron onClick={() => setCurrentView('settings')} />
+              <CellSimple title="Таблица лидеров" showChevron onClick={() => setCurrentView('leaderboard')} />
               {/* <CellSimple title="Архив мероприятий" showChevron /> */}
               {/* <CellSimple title="О приложении" showChevron /> */}
             </CellList>
@@ -78,7 +81,11 @@ const ProfilePage = ({ user }: ProfilePageProps) => {
     );
   }
 
-  return <SettingsPanel onBack={() => setCurrentView('main')} user={user} />;
+  if (currentView === 'settings') {
+    return <SettingsPanel onBack={() => setCurrentView('main')} user={user} />;
+  }
+
+  return <LeaderboardPanel onBack={() => setCurrentView('main')} />;
 };
 
 export default ProfilePage;

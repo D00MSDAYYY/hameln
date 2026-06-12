@@ -10,15 +10,14 @@ from .aux import PersonName
 class UserInfoResponse(VisibleFieldsModel):
     id: int | None = field(visible_to=[Role.admin], default=None)
 
-    nickname: str | None = field(visible_to=[Role.observer], default=None)
     role: Role | None = field(visible_to=[Role.admin], default=None)
     password: str | None = field(visible_to=[Role.admin], default=None)
 
-    firstname: PersonName | None = field(visible_to=[Role.user], default=None)
-    lastname: PersonName | None = field(visible_to=[Role.user], default=None)
+    firstname: PersonName | None = field(visible_to=[Role.observer], default=None)
+    lastname: PersonName | None = field(visible_to=[Role.observer], default=None)
 
     points: int | None = field(visible_to=[Role.observer], default=None)
-    company: str | None = field(visible_to=[Role.user], default=None)
+    company: str | None = field(visible_to=[Role.observer], default=None)
 
     phone: str | None = field(visible_to=[Role.user], default=None)
 
@@ -78,7 +77,6 @@ class NotificationInfoResponse(VisibleFieldsModel):
 class SignupRequestInfoResponse(VisibleFieldsModel):
     id: int | None = field(visible_to=[Role.admin], default=None)
 
-    nickname: str | None = field(visible_to=[Role.admin], default=None)
     firstname: PersonName | None = field(visible_to=[Role.admin], default=None)
     lastname: PersonName | None = field(visible_to=[Role.admin], default=None)
     company: str | None = field(visible_to=[Role.admin], default=None)

@@ -26,7 +26,6 @@ def test_normalize_russian_phone_rejects_invalid_values(raw):
 
 def test_signup_request_normalizes_phone_and_accepts_valid_names():
     request = SignupRequest(
-        nickname="anna",
         phone="8 (999) 000-11-22",
         firstname="Анна-Мария",
         lastname="Иванова",
@@ -41,20 +40,8 @@ def test_signup_request_normalizes_phone_and_accepts_valid_names():
 def test_signup_request_rejects_invalid_firstname(firstname):
     with pytest.raises(ValidationError):
         SignupRequest(
-            nickname="ivan",
             phone="+79990001122",
             firstname=firstname,
-            lastname="Иванов",
-            company="Test",
-        )
-
-
-def test_signup_request_rejects_empty_nickname():
-    with pytest.raises(ValidationError):
-        SignupRequest(
-            nickname="",
-            phone="+79990001122",
-            firstname="Иван",
             lastname="Иванов",
             company="Test",
         )
